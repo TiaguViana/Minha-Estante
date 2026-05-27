@@ -1,0 +1,15 @@
+# Android / Gradle
+.gradle/
+.idea/
+build/
+app/build/
+local.properties
+
+# React Native / Node
+node_modules/
+.expo/
+npm-debug.log
+
+# Mac/Windows OS
+.DS_Store
+Thumbs.db
