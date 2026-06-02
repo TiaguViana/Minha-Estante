@@ -1,10 +1,10 @@
-# 📚 Minha Estante 
+#  Minha Estante 
 
 Um aplicativo completo para gerenciamento de leitura, permitindo que os usuários busquem livros, organizem suas estantes e protejam suas leituras privadas com segurança biométrica. 
 
 Este projeto utiliza uma arquitetura de **Monorepo**, contendo o aplicativo principal (Android Nativo) e um painel administrativo (React Native) no mesmo repositório.
 
-## 🎯 Escopo e Funcionalidades Atendidas
+##  Escopo e Funcionalidades Atendidas
 
 Este projeto atende aos seguintes requisitos técnicos:
 
@@ -17,7 +17,7 @@ Este projeto atende aos seguintes requisitos técnicos:
 
 ---
 
-## 🗂️ Estrutura do Repositório (Monorepo)
+##  Estrutura do Repositório (Monorepo)
 
 O projeto está dividido nas seguintes frentes de trabalho:
 
@@ -31,7 +31,7 @@ minha-estante/
 
 ---
 
-## 🚀 Como Clonar e Executar o Projeto
+##  Como Clonar e Executar o Projeto
 
 **Atenção Equipe e Avaliadores:** Como este é um monorepo com múltiplas tecnologias, siga rigorosamente as instruções abaixo para a plataforma que deseja rodar, para evitar erros de módulos não encontrados.
 
@@ -42,7 +42,7 @@ Abra o seu terminal e execute:
 git clone https://github.com/SEU_USUARIO/minha-estante.git
 ```
 
-### 📱 Passo 2: Rodar o Aplicativo Android (Kotlin)
+###  Passo 2: Rodar o Aplicativo Android (Kotlin)
 O aplicativo principal deve ser aberto **exclusivamente** no Android Studio.
 
 1. Abra o Android Studio e clique em **Open**.
@@ -51,7 +51,7 @@ O aplicativo principal deve ser aberto **exclusivamente** no Android Studio.
 4. Aguarde o *Gradle Sync* terminar de baixar as dependências (uma barra de carregamento no canto inferior direito).
 5. Quando o carregamento concluir, aperte o botão de **Play (Run)** para iniciar o emulador.
 
-### 🌐 Passo 3: Rodar o Painel Administrativo (React Native)
+###  Passo 3: Rodar o Painel Administrativo (React Native)
 O painel administrativo deve ser aberto preferencialmente no **VS Code**.
 
 1. Abra a pasta raiz `minha-estante` no VS Code.
@@ -73,11 +73,3 @@ npm install
 npx expo start
 ```
 
----
-
-## 👥 Equipe e Divisão de Tarefas
-
-* **[Nome do Integrante 1]** - UI/UX Android (Jetpack Compose, Acessibilidade e i18n)
-* **[Nome do Integrante 2]** - Lógica Android (Retrofit/Google Books API, Biometria e Integração UI)
-* **[Nome do Integrante 3]** - Painel Administrativo (React Native Cross-platform)
-* **[Nome do Integrante 4]** - Backend & Banco de Dados (Firebase Auth, Firestore CRUD e Configurações)
