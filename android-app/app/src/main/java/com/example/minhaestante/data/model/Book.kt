@@ -1,3 +1,5 @@
 package com.example.minhaestante.data.model
 
-data class Book()
+data class Book(
+    val teste: String = ""
+)
