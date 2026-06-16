@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     height: 121,
     width: 263,
     marginBottom: spacing.logoGap,
-    resizeMode: 'contain', // <-- Garante que a imagem se ajuste bem aos limites
+    resizeMode: 'contain', //  Garante que a imagem se ajuste bem aos limites
   },
   container: {
     flex: 1,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     maxWidth: 571,            // Limita a largura em telas grandes (tablets/web)
     backgroundColor: colors.background,  // Caixa branca
     paddingTop: spacing.xxl,
-    borderRadius: 12,         // Bordas arredondadas
+    borderRadius: 12,         
     paddingHorizontal: 36,
     paddingBottom: spacing.xxl,
 
@@ -156,16 +156,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
     color: colors.textFadedStroke,
     ...typography.redefinir
-
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-
     borderWidth: 2,
     borderColor: colors.textFadedStroke,
     borderRadius: 12,
-
     paddingHorizontal: 12,
   },
   inputIcon: {

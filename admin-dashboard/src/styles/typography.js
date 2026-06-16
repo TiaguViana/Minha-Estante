@@ -8,8 +8,8 @@ export const typography = {
   },
 
   h2: {
-    fontFamily: Fonts.headingRegular,
-    fontSize: 24,
+    fontFamily: Fonts.headingsemibold,
+    fontSize: 40,
     lineHeight: 32,
   },
   redefinir: {

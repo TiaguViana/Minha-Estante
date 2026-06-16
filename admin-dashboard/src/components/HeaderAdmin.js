@@ -153,12 +153,12 @@ const styles = StyleSheet.create({
   },
 
   roleText: {
-    color: '#2F3036',
+    color: colors.hboarder,
     textTransform: 'uppercase',
     ...typography.admrole,
   },
   nameText: {
-    color: '#2F3036',
+    color: colors.hboarder,
     ...typography.admtext,
   },
 
@@ -170,16 +170,16 @@ const styles = StyleSheet.create({
     padding: 2,
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#7FA1B8',
+    borderColor: colors.blue1,
   },
   toggleTrackActive: {
-    backgroundColor: '#23272D',
+    backgroundColor: colors.darkmode,
   },
   toggleCircle: {
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#6B9BAB',
+    backgroundColor: colors.blue1,
     justifyContent: 'center', 
     alignItems: 'center',
   },
