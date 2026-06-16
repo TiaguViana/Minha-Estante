@@ -22,7 +22,8 @@ export const colors = {
  // caixa
  inputBorder: "6B9BAB",
  
-  // estados
-  error: "#EF4444",
-  success: "#22C55E",
+  // header
+  hboarder: "#2F3036",
+  searchbar: "#6B9BAB",
+  searchbarText: "#8CC9DE",
 };

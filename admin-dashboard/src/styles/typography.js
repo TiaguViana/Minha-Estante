@@ -27,4 +27,12 @@ export const typography = {
     fontFamily: Fonts.botao,
     fontSize: 16,
   },
+  admtext: {
+    fontFamily: Fonts.body,
+    fontSize: 18,
+  },
+  admrole: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 18,
+  },
 };

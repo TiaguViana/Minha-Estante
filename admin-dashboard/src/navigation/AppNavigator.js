@@ -18,7 +18,7 @@ return(
 <NavigationContainer>
 
 <Stack.Navigator
-initialRouteName="Login"
+initialRouteName="Dashboard"
 screenOptions={{
 headerShown:false
 }}

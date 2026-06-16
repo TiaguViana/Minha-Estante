@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    color: colors.textFaded,
     fontSize: 16,
     paddingVertical: 10,
     borderWidth: 0
