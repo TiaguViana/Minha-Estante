@@ -28,7 +28,7 @@ export default function SplashScreen({ navigation }) {
     >
 
       <Image
-        source={require("../../assets/logo1.png")}
+        source={require("../../assets//logo/logoD.png")}
         style={{
           width:237,
           height:109

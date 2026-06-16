@@ -14,36 +14,67 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
 
-      <Image style={styles.logo} source={require('../../assets/logo1.png')} />
+      <Image style={styles.logo} source={require('../../assets/logo/logoD.png')} />
 
       {/* Caixa centralizada (Card) */}
       <View style={styles.card}>
 
 
-
         {/* Bloco do E-mail */}
         <Text style={styles.textoLogin}>E-mail</Text>
-        <TextInput
-          style={[styles.input , {marginBottom: spacing.md}]}
-          placeholder="Insira seu E-mail"
-          placeholderTextColor={colors.textFaded}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+
+        <View
+          style={[
+            styles.inputContainer,
+            { marginBottom: spacing.md }
+          ]}
+        >
+          <TextInput
+            style={styles.input}
+            placeholder="Insira seu E-mail"
+            placeholderTextColor={colors.textFaded}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        
+          <Image
+            source={require('../../assets/icons/Vector.png')}
+            style={styles.inputIcon}
+          />
+      
+        </View>
+
+
+
 
         {/* Bloco da Senha */}
         <Text style={styles.textoLogin}>Senha</Text>
-        <TextInput
-          style={[styles.input , {marginBottom: spacing.sm}]}
-          placeholder="Insira sua senha"
-          placeholderTextColor={colors.textFaded}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={true}
-          autoCapitalize="none"
-        />
+
+        <View
+          style={[
+            styles.inputContainer,
+            { marginBottom: spacing.sm }
+          ]}
+        >
+
+          <TextInput
+            style={styles.input}
+            placeholder="Insira sua senha"
+            placeholderTextColor={colors.textFaded}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={true}
+            autoCapitalize="none"
+          />
+
+          <Image
+            source={require('../../assets/icons/Icon.png')}
+            style={styles.inputIcon}
+          />
+        </View>
+
         <TouchableOpacity>
           <Text style={styles.esqueceuSenha}>
             Redefinir Senha
@@ -97,13 +128,10 @@ const styles = StyleSheet.create({
     boxShadow: '4px 4px 0px 0px #380641'
   },
   input: {
-    borderWidth: 1,
-    color: colors.textFaded,
-    borderColor: colors.textFadedStroke,
-    borderRadius: 12,
-    padding: 10,
+    flex: 1,
     fontSize: 16,
-    borderWidth: 2,
+    paddingVertical: 10,
+    borderWidth: 0
   },
   botao: {
     backgroundColor: colors.surface,
@@ -128,6 +156,22 @@ const styles = StyleSheet.create({
     color: colors.textFadedStroke,
     ...typography.redefinir
 
-  }
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    borderWidth: 2,
+    borderColor: colors.textFadedStroke,
+    borderRadius: 12,
+
+    paddingHorizontal: 12,
+  },
+  inputIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+  },
 });
+
 
