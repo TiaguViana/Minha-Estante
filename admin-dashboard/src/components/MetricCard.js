@@ -2,9 +2,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, Image } from 'react-native';
 
-// Paleta extraída do mockup (Figma). Cada variante define a cor da borda,
-// o fundo do "selo" do ícone e o tom do próprio ícone (quando ele for
-// um ícone de linha/monocromático que pode receber tintColor).
 const VARIANTS = {
   purple: {
     border: '#BC86C4',
@@ -99,8 +96,6 @@ const styles = StyleSheet.create({
     height: 22.5,
   },
   value: {
-    // Troque 'serif' pela mesma fontFamily usada no seu typography.h2 /
-    // logo, se você já carrega uma fonte customizada (ex: via expo-font).
     fontFamily: 'serif',
     fontWeight: '700',
     fontSize: 32,
