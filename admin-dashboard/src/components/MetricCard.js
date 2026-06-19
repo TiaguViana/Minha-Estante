@@ -2,21 +2,74 @@
 import React from 'react';
 import { StyleSheet, View, Text, Image } from 'react-native';
 
-export default function MetricCard({ value, label, icon, badgeColor, iconColor, shadowColor }) {
-  return (
-    <View style={[styles.card, { borderColor: shadowColor, shadowColor: shadowColor }]}>
-      
-      {/* Mini quadrado de fundo do ícone */}
-      <View style={[styles.iconBadge, { backgroundColor: badgeColor }]}>
-        <Image source={icon} style={[styles.cardIcon, { tintColor: iconColor }]} />
-      </View>
-      
-      {/* Valor numérico */}
-      <Text style={styles.cardValue}>{value}</Text>
-      
-      {/* Descrição do card */}
-      <Text style={styles.cardLabel}>{label}</Text>
+// Paleta extraída do mockup (Figma). Cada variante define a cor da borda,
+// o fundo do "selo" do ícone e o tom do próprio ícone (quando ele for
+// um ícone de linha/monocromático que pode receber tintColor).
+const VARIANTS = {
+  purple: {
+    border: '#BC86C4',
+    iconBg: '#F1E4F5',
+    iconTint: '#9B5FA8',
+  },
+  green: {
+    border: '#B4C273',
+    iconBg: '#EBF1D7',
+    iconTint: '#7C8F3E',
+  },
+  gold: {
+    border: '#E8C989',
+    iconBg: '#FBE9C3',
+    iconTint: '#C99A3E',
+  },
+};
 
+/**
+ * Card de métrica do Dashboard (ex: "102 Usuários no Sistema").
+ *
+ * @param {keyof VARIANTS} variant - paleta do card ('purple' | 'green' | 'gold')
+ * @param {ImageSourcePropType} icon - imagem do ícone (require(...))
+ * @param {boolean} tintIcon - se true, aplica a cor da variante sobre o ícone
+ *   (use para ícones de linha/monocromáticos). Deixe false para ícones já
+ *   coloridos (como o ícone da "estante", no card dourado do mockup).
+ * @param {string|number} value - valor grande exibido (ex: "102", "30")
+ * @param {string} label - legenda abaixo do valor
+ * @param {object} [style] - estilo extra para o container (ex: flex no row)
+ */
+export default function MetricCard({
+  variant = 'purple',
+  icon,
+  tintIcon = true,
+  value,
+  label,
+  style,
+}) {
+  const theme = VARIANTS[variant] || VARIANTS.purple;
+
+  return (
+    <View
+      style={[
+        styles.card,
+        {
+          borderColor: theme.border,
+          boxShadow: '4px 4px 0px 0px #000000',
+        },
+        style,
+      ]}
+    >
+      <View style={[styles.iconBox, { backgroundColor: theme.iconBg }]}>
+        {icon ? (
+          <Image
+            source={icon}
+            style={[styles.icon, tintIcon && { tintColor: theme.iconTint }]}
+            resizeMode="contain"
+            accessible
+            accessibilityLabel={label}
+          />
+        ) : null}
+      </View>
+
+      <Text style={styles.value}>{value}</Text>
+      <Text style={styles.label}>{label}</Text>
     </View>
   );
 }
@@ -24,39 +77,38 @@ export default function MetricCard({ value, label, icon, badgeColor, iconColor, 
 const styles = StyleSheet.create({
   card: {
     flex: 1,
+    minWidth: 220,
+    maxWidth: 299,
+    height: 173,
     backgroundColor: '#FFFFFF',
     borderWidth: 2,
-    borderRadius: 20,
-    padding: 24,
-    // Sombra sólida e deslocada idêntica ao seu Figma
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 5,
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 22,
   },
-  iconBadge: {
-    width: 42,
-    height: 42,
-    borderRadius: 8,
+  iconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
   },
-  cardIcon: {
-    width: 24,
-    height: 24,
-    resizeMode: 'contain',
-    alignSelf: 'center',
+  icon: {
+    width: 25,
+    height: 22.5,
   },
-  cardValue: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#0066FF', // Azul vibrante do Figma
-    marginBottom: 8,
+  value: {
+    // Troque 'serif' pela mesma fontFamily usada no seu typography.h2 /
+    // logo, se você já carrega uma fonte customizada (ex: via expo-font).
+    fontFamily: 'serif',
+    fontWeight: '700',
+    fontSize: 32,
+    color: '#0072FF',
+    marginBottom: 6,
   },
-  cardLabel: {
-    fontSize: 16,
-    color: '#333333',
-    fontWeight: '500',
+  label: {
+    fontSize: 15,
+    color: '#33333A',
   },
 });

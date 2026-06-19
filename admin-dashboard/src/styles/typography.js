@@ -35,4 +35,10 @@ export const typography = {
     fontFamily: Fonts.bodyBold,
     fontSize: 18,
   },
+
+  // user table
+  users: {
+    fontFamily: Fonts.body,
+    fontSize: 16,
+  },
 };

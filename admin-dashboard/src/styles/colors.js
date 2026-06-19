@@ -1,33 +1,29 @@
 export const colors = {
-  // MODO CLARO 
-  // fundo geral do app
+  // MODO CLARO
   background: "#FFFCF5",
-
-  // card
   loginText: "#442E1D",
   borderColor: "#B1C856",
-
-  // botões
   surface: "#C3D287",
   bttnStroke: "#B1C856",
   bttnText: "#442E1D",
-
-  // texto
   textFaded: "#DBB455",
   textFadedStroke: "#B78B00",
-
- // caixa
- inputBorder: "#6B9BAB",
- 
-  // header
+  inputBorder: "#6B9BAB",
   hboarder: "#2F3036",
   searchbar: "#6B9BAB",
   searchbarText: "#8CC9DE",
-
-  //dashboard colors
   blue1: "#7FA1B8",
   darkmode: "#23272D",
   textbrown: "#442E1D",
 
-  // MODO ESCURO
+  // USER TABLE
+  tableCardBorder: '#99C8D8',
+  tableHeaderBg: '#99C8D8',
+  tableHeaderText: '#2F3036',
+  tableRowSeparator: '#E8F4F8',
+  tableRowText: '#2F3036',
+  tableDotAtivo: '#B1C856',
+  tableDotInativo: '#DBB455',
+  tablePaginacaoText: '#2F3036',
+  tablePaginacaoBorder: '#C8D8E0',
 };

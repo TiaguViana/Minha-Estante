@@ -3,9 +3,27 @@ import React from 'react';
 import { StyleSheet, View, Image, TextInput, Text, TouchableOpacity } from 'react-native';
 import { colors, typography } from '../styles'; // Ajuste o caminho do seu arquivo de estilos se necessário
 
-export default function HeaderAdmin() {
+export default function HeaderAdmin({
+  adminName = 'Sabrina',
+  adminRole = 'Admin',
+  avatarSource = require('../../assets/icons/avatar.png'),
+  searchValue,
+  onSearchChange,
+  onSearchSubmit,
+  searchPlaceholder = 'Buscar Usuários, Livros...',
+}) {
 
   const [darkMode, setDarkMode] = React.useState(false); // Estado para controlar o modo noturno
+
+  // Se quem usa o HeaderAdmin não passar searchValue/onSearchChange (como é
+  // o caso hoje), o campo de busca usa esse estado interno e continua
+  // funcionando normalmente. Quando a busca de verdade (Google Books) for
+  // implementada, basta passar searchValue/onSearchChange por fora que o
+  // componente passa a ser controlado pelo pai, sem precisar mudar nada aqui.
+  const [internalSearch, setInternalSearch] = React.useState('');
+  const valorDaBusca = searchValue !== undefined ? searchValue : internalSearch;
+  const aoMudarBusca = onSearchChange || setInternalSearch;
+
   return (
     <View style={styles.header}>
       <View style={styles.headerContent}>
@@ -20,9 +38,13 @@ export default function HeaderAdmin() {
             style={styles.inputIcon}
           />
           <TextInput
-            placeholder="Buscar Usuários, Livros..."
+            placeholder={searchPlaceholder}
             placeholderTextColor={colors.searchbarText}
             style={styles.searchInput}
+            value={valorDaBusca}
+            onChangeText={aoMudarBusca}
+            onSubmitEditing={onSearchSubmit}
+            returnKeyType="search"
           />
         </View>
 
@@ -33,13 +55,13 @@ export default function HeaderAdmin() {
           <View style={styles.profileBox}>
             <View style={styles.avatarCircle}>
               <Image
-                source={require('../../assets/icons/avatar.png')} // <-- Coloque o caminho do seu ícone do Figma aqui
+                source={avatarSource}
                 style={styles.avatarIcon}
               />
             </View>
             <View style={styles.adminTexts}>
-              <Text style={styles.roleText}>Admin</Text>
-              <Text style={styles.nameText}>Sabrina</Text>
+              <Text style={styles.roleText}>{adminRole}</Text>
+              <Text style={styles.nameText}>{adminName}</Text>
             </View>
           </View>
 
@@ -193,9 +215,9 @@ const styles = StyleSheet.create({
     
   },
   toggleIconLight: {
-    tintColor: '#ffffff', // Um tom de amarelo/ouro para o Sol no modo claro
+    tintColor: '#ffffff',
   },
   toggleIconDark: {
-    tintColor: '#000000', // O roxo escuro do seu app para a Lua no modo noturno
+    tintColor: '#000000',
   },
 });

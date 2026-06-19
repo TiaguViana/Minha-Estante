@@ -6,9 +6,19 @@ import { colors, typography, spacing } from '../styles/index';
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState('');
 
   const entrar = () => {
+    setErro('');
+    setLoading(true);
+
+    // Por enquanto só simula -- quando o Firebase Auth entrar, troca isso
+    // por signInWithEmailAndPassword(auth, email, password), e usa
+    // .then/.catch (ou try/catch com await) pra setLoading(false) e, em
+    // caso de falha, setErro com a mensagem certa.
     Alert.alert('Dados digitados', `E-mail: ${email}\nSenha: ${password}`);
+    setLoading(false);
   };
 
   return (
@@ -75,6 +85,8 @@ export default function LoginScreen() {
           />
         </View>
 
+        {erro ? <Text style={styles.erroText}>{erro}</Text> : null}
+
         <TouchableOpacity>
           <Text style={styles.esqueceuSenha}>
             Redefinir Senha
@@ -82,8 +94,12 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         {/* Botão de Entrar */}
-        <TouchableOpacity style={styles.botao} onPress={entrar}>
-          <Text style={styles.botaoText}>Entrar</Text>
+        <TouchableOpacity
+          style={[styles.botao, loading && styles.botaoDesabilitado]}
+          onPress={entrar}
+          disabled={loading}
+        >
+          <Text style={styles.botaoText}>{loading ? 'Entrando...' : 'Entrar'}</Text>
         </TouchableOpacity>
 
       </View>
@@ -142,6 +158,9 @@ const styles = StyleSheet.create({
     borderColor: colors.bttnStroke,
     borderWidth: 2,
   },
+  botaoDesabilitado: {
+    opacity: 0.6,
+  },
   botaoText: {
     color: colors.bttnText,
     alignItems: 'center',
@@ -157,6 +176,11 @@ const styles = StyleSheet.create({
     color: colors.textFadedStroke,
     ...typography.redefinir
   },
+  erroText: {
+    color: '#C0392B',
+    marginBottom: spacing.sm,
+    fontSize: 14,
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -171,5 +195,3 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
 });
-
-
