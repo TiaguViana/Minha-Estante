@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MinhaEstante"
+rootProject.name = "testepfv"
 include(":app")
  
