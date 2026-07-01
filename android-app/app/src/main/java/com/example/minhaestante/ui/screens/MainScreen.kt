@@ -1,4 +1,4 @@
-package com.example.testepfv
+package com.example.minhaestante.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -22,11 +21,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.testepfv.BiometricHelper.autenticar
-import com.example.testepfv.ui.theme.*
+import com.example.minhaestante.R
+import com.example.minhaestante.ui.theme.AtkinsonHyperlegible
+import com.example.minhaestante.ui.theme.Baskervville
+import com.example.minhaestante.ui.theme.BuscaBordaDark
+import com.example.minhaestante.ui.theme.BuscaBordaLight
+import com.example.minhaestante.ui.theme.BuscaPreenchimentoDark
+import com.example.minhaestante.ui.theme.BuscaPreenchimentoLight
+import com.example.minhaestante.ui.theme.CorDestaque
+import com.example.minhaestante.ui.theme.DarkBackground
+import com.example.minhaestante.ui.theme.DarkTextPrimary
+import com.example.minhaestante.ui.theme.DarkTextSecondary
+import com.example.minhaestante.ui.theme.EstanteSecretaPrimaryLight
+import com.example.minhaestante.ui.theme.EstanteSecretaSecondaryLight
+import com.example.minhaestante.ui.theme.LightBackground
+import com.example.minhaestante.ui.theme.LightTextPrimary
+import com.example.minhaestante.ui.theme.LightTextSecondary
+import com.example.minhaestante.ui.theme.MeusLivrosPrimaryLight
+import com.example.minhaestante.ui.theme.MeusLivrosSecondaryLight
+import com.example.minhaestante.utils.BiometricHelper.autenticar
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -36,12 +56,38 @@ fun MainScreen() {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
 
+    val coroutineScope = rememberCoroutineScope()
+    val repository = remember { com.example.minhaestante.data.BookRepository() }
+
+    // 👇 Instâncias do Firebase para buscar o nome dinamicamente
+    val auth = remember { FirebaseAuth.getInstance() }
+    val firestore = remember { FirebaseFirestore.getInstance() }
+
+    val stringCarregando = stringResource(id = R.string.usuario_carregando)
+    var nomeUsuario by remember { mutableStateOf(stringCarregando) }
+
+    // Efeito para escutar as mudanças do nome do usuário logado no Firestore
+    LaunchedEffect(Unit) {
+        val uid = auth.currentUser?.uid
+        if (uid != null) {
+            firestore.collection("usuarios").document(uid)
+                .addSnapshotListener { documentSnapshot, _ ->
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        val nomeObtido = documentSnapshot.getString("nome")
+                        if (!nomeObtido.isNullOrBlank()) {
+                            nomeUsuario = nomeObtido
+                        }
+                    }
+                }
+        }
+    }
+
     val backgroundColor = if (isDark) DarkBackground else LightBackground
     val textPrimaryColor = if (isDark) DarkTextPrimary else LightTextPrimary
     val textSecondaryColor = if (isDark) DarkTextSecondary else LightTextSecondary
     val goldAccent = if (isDark) BuscaBordaDark else BuscaBordaLight
 
-    var booksList by remember { mutableStateOf(listOf<Book>()) }
+    val booksList by repository.getBooks().collectAsState(initial = emptyList())
     var selectedTab by remember { mutableStateOf(0) } // 0 = Meus Livros, 1 = Estante Secreta
     var searchQuery by remember { mutableStateOf("") }
     var isDescendingOrder by remember { mutableStateOf(true) }
@@ -57,13 +103,13 @@ fun MainScreen() {
 
     val sortedBooks = filteredBooks.sortedWith { b1, b2 ->
         if (isDescendingOrder) {
-            b2.readingDate.compareTo(b1.readingDate) // Mais Recentes
+            b2.readingDate.compareTo(b1.readingDate)
         } else {
-            b1.readingDate.compareTo(b2.readingDate) // Mais Antigos
+            b1.readingDate.compareTo(b2.readingDate)
         }
     }
 
-    val groupFormatter = SimpleDateFormat("MMMM yyyy", Locale("pt", "BR"))
+    val groupFormatter = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
     val groupedBooks = sortedBooks.groupBy { book ->
         groupFormatter.format(book.readingDate).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
     }
@@ -83,9 +129,11 @@ fun MainScreen() {
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Região de Boas-vindas Dinâmica
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Olá, ",
+                    text = stringResource(id = R.string.saudacao_ola),
                     fontSize = 28.sp,
                     fontFamily = Baskervville,
                     color = textPrimaryColor
@@ -96,7 +144,7 @@ fun MainScreen() {
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = "Sabrina!",
+                        text = nomeUsuario, // 👈 Agora exibe o nome vindo do Firebase
                         fontSize = 28.sp,
                         fontFamily = Baskervville,
                         fontWeight = FontWeight.Bold,
@@ -105,7 +153,7 @@ fun MainScreen() {
                 }
             }
             Text(
-                text = "Como andam suas leituras?",
+                text = stringResource(id = R.string.subtitulo_leituras),
                 fontSize = 16.sp,
                 fontFamily = AtkinsonHyperlegible,
                 color = textPrimaryColor,
@@ -114,6 +162,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // ABAS
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -122,7 +171,7 @@ fun MainScreen() {
                         .clickable { selectedTab = 0 }
                 ) {
                     Text(
-                        text = "Meus Livros",
+                        text = stringResource(id = R.string.aba_meus_livros),
                         fontSize = 16.sp,
                         fontFamily = AtkinsonHyperlegible,
                         fontWeight = FontWeight.Bold,
@@ -150,7 +199,7 @@ fun MainScreen() {
                         }
                 ) {
                     Text(
-                        text = "Estante Secreta",
+                        text = stringResource(id = R.string.aba_estante_secreta),
                         fontSize = 16.sp,
                         fontFamily = AtkinsonHyperlegible,
                         fontWeight = FontWeight.Bold,
@@ -168,6 +217,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // BUSCA E BOTÃO ADICIONAR (Com descrições acessíveis para TalkBack)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -178,8 +228,14 @@ fun MainScreen() {
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Buscar", color = placeholderColor) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = goldAccent) },
+                    placeholder = { Text(text = stringResource(id = R.string.hint_buscar), color = placeholderColor) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = stringResource(id = R.string.desc_campo_busca), // 👈 Acessibilidade
+                            tint = goldAccent
+                        )
+                    },
                     singleLine = true,
                     shape = RoundedCornerShape(18.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -200,25 +256,33 @@ fun MainScreen() {
                     modifier = Modifier
                         .size(44.dp)
                         .border(1.5.dp, goldAccent, RoundedCornerShape(22.dp))
-                        .clickable {
+                        .clickable(
+                            onClickLabel = stringResource(id = R.string.desc_botao_adicionar) // 👈 Fornece dica de clique para leitores de tela
+                        ) {
                             bookToEdit = null
                             showModal = true
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Adicionar", tint = goldAccent, modifier = Modifier.size(24.dp))
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(id = R.string.desc_botao_adicionar), // 👈 Acessibilidade
+                        tint = goldAccent,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // FILTROS E CONTEÚDOS
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (selectedTab == 0) "Meus Livros" else "Estante Secreta",
+                    text = if (selectedTab == 0) stringResource(id = R.string.aba_meus_livros) else stringResource(id = R.string.aba_estante_secreta),
                     fontSize = 22.sp,
                     fontFamily = Baskervville,
                     fontWeight = FontWeight.Bold,
@@ -231,7 +295,7 @@ fun MainScreen() {
                 ) {
                     Icon(
                         imageVector = if (filterOnlyFavorites) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Filtrar favoritos",
+                        contentDescription = stringResource(id = R.string.desc_filtrar_favoritos), // 👈 Acessibilidade
                         tint = if (filterOnlyFavorites) goldAccent else CorDestaque,
                         modifier = Modifier
                             .size(22.dp)
@@ -244,7 +308,7 @@ fun MainScreen() {
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Text(
-                            text = if (isDescendingOrder) "Recentes" else "Antigos",
+                            text = if (isDescendingOrder) stringResource(id = R.string.filtro_recentes) else stringResource(id = R.string.filtro_antigos),
                             fontSize = 16.sp,
                             fontFamily = AtkinsonHyperlegible,
                             fontWeight = FontWeight.Medium,
@@ -252,7 +316,10 @@ fun MainScreen() {
                         )
                         Icon(
                             imageVector = if (isDescendingOrder) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                            contentDescription = "Mudar Ordenação",
+                            // Descrição de acessibilidade dinâmica baseada no estado do botão 👇
+                            contentDescription = stringResource(
+                                id = if (isDescendingOrder) R.string.desc_mudar_ordenacao_recentes else R.string.desc_mudar_ordenacao_antigos
+                            ),
                             tint = goldAccent,
                             modifier = Modifier.size(18.dp)
                         )
@@ -291,11 +358,13 @@ fun MainScreen() {
                                 showModal = true
                             },
                             onDeleteClick = {
-                                booksList = booksList.filter { it.id != book.id }
+                                coroutineScope.launch {
+                                    repository.deleteBook(book.id)
+                                }
                             },
                             onFavoriteClick = {
-                                booksList = booksList.map {
-                                    if (it.id == book.id) it.copy(isFavorite = !it.isFavorite) else it
+                                coroutineScope.launch {
+                                    repository.saveBook(book.copy(isFavorite = !book.isFavorite))
                                 }
                             }
                         )
@@ -311,23 +380,23 @@ fun MainScreen() {
             section = currentSection,
             onDismiss = { showModal = false },
             onSave = { title, author, desc, status, rating, date, imageUrl ->
-                if (bookToEdit == null) {
-                    val newBook = Book(
-                        id = UUID.randomUUID().toString(),
-                        title = title,
-                        author = author,
-                        description = desc,
-                        readingStatus = status,
-                        rating = rating,
-                        readingDate = date,
-                        imageUrl = imageUrl,
-                        isFavorite = false,
-                        section = currentSection
-                    )
-                    booksList = booksList + newBook
-                } else {
-                    booksList = booksList.map {
-                        if (it.id == bookToEdit!!.id) it.copy(
+                coroutineScope.launch {
+                    if (bookToEdit == null) {
+                        val newBook = Book(
+                            id = UUID.randomUUID().toString(),
+                            title = title,
+                            author = author,
+                            description = desc,
+                            readingStatus = status,
+                            rating = rating,
+                            readingDate = date,
+                            imageUrl = imageUrl,
+                            isFavorite = false,
+                            section = currentSection
+                        )
+                        repository.saveBook(newBook)
+                    } else {
+                        val updatedBook = bookToEdit!!.copy(
                             title = title,
                             author = author,
                             description = desc,
@@ -335,7 +404,8 @@ fun MainScreen() {
                             rating = rating,
                             readingDate = date,
                             imageUrl = imageUrl
-                        ) else it
+                        )
+                        repository.saveBook(updatedBook)
                     }
                 }
                 showModal = false

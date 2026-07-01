@@ -1,5 +1,6 @@
-package com.example.testepfv
+package com.example.minhaestante.ui.screens
 
+//////////////////////////////// imports //////////////////////////////////////
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,12 +18,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.testepfv.ui.theme.*
+import com.example.minhaestante.R
+import com.example.minhaestante.ui.theme.AtkinsonHyperlegible
+import com.example.minhaestante.ui.theme.Baskervville
+import com.example.minhaestante.ui.theme.BuscaBordaDark
+import com.example.minhaestante.ui.theme.BuscaBordaLight
+import com.example.minhaestante.ui.theme.DarkSurface
+import com.example.minhaestante.ui.theme.DarkTextPrimary
+import com.example.minhaestante.ui.theme.DarkTextSecondary
+import com.example.minhaestante.ui.theme.EstanteSecretaPrimaryLight
+import com.example.minhaestante.ui.theme.EstanteSecretaSecondaryLight
+import com.example.minhaestante.ui.theme.LightSurface
+import com.example.minhaestante.ui.theme.LightTextPrimary
+import com.example.minhaestante.ui.theme.LightTextSecondary
+import com.example.minhaestante.ui.theme.MeusLivrosPrimaryLight
+import com.example.minhaestante.ui.theme.MeusLivrosSecondaryLight
+import com.example.minhaestante.ui.theme.StatusConcluidoLight
+import com.example.minhaestante.ui.theme.StatusEmAndamento
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -34,6 +59,7 @@ fun BookCard(
     onDeleteClick: () -> Unit,
     onFavoriteClick: () -> Unit
 ) {
+    val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -48,7 +74,12 @@ fun BookCard(
     val textSecondaryColor = if (isDark) DarkTextSecondary else LightTextSecondary
     val goldAccent = if (isDark) BuscaBordaDark else BuscaBordaLight
 
-    val dateFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
+    val dateFormat = remember { SimpleDateFormat("dd/MM", Locale.getDefault()) }
+
+    // Tratamento de strings fallback para evitar quebras visuais e falhas de tradução
+    val tituloTratado = book.title.ifEmpty { stringResource(id = R.string.label_sem_titulo) }
+    val autorTratado = book.author.ifEmpty { stringResource(id = R.string.label_autor_desconhecido) }
+    val descricaoTratada = book.description.ifEmpty { stringResource(id = R.string.label_sem_descricao) }
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -56,7 +87,7 @@ fun BookCard(
             containerColor = cardBackground,
             title = {
                 Text(
-                    text = "Excluir Livro",
+                    text = stringResource(id = R.string.dialog_excluir_titulo),
                     fontFamily = Baskervville,
                     fontWeight = FontWeight.Bold,
                     color = textPrimaryColor
@@ -64,7 +95,7 @@ fun BookCard(
             },
             text = {
                 Text(
-                    text = "Tem certeza que deseja remover este livro da sua lista?",
+                    text = stringResource(id = R.string.dialog_excluir_mensagem),
                     fontFamily = AtkinsonHyperlegible,
                     color = textSecondaryColor
                 )
@@ -76,12 +107,21 @@ fun BookCard(
                         onDeleteClick()
                     }
                 ) {
-                    Text("Sim", fontFamily = AtkinsonHyperlegible, color = Color.Red, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = stringResource(id = R.string.btn_sim),
+                        fontFamily = AtkinsonHyperlegible,
+                        color = Color.Red,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancelar", fontFamily = AtkinsonHyperlegible, color = textSecondaryColor)
+                    Text(
+                        text = stringResource(id = R.string.btn_cancelar),
+                        fontFamily = AtkinsonHyperlegible,
+                        color = textSecondaryColor
+                    )
                 }
             }
         )
@@ -105,7 +145,7 @@ fun BookCard(
 
                 AsyncImage(
                     model = seguraImageUrl,
-                    contentDescription = "Capa do livro ${book.title}",
+                    contentDescription = stringResource(id = R.string.logo_desc) + ": $tituloTratado",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .width(75.dp)
@@ -119,28 +159,45 @@ fun BookCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                // Linha Superior: Agrupamento de Ações Rápidas com Semântica de Acessibilidade Correta
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val descFavorito = stringResource(
+                        id = if (book.isFavorite) R.string.desc_desfavoritar_livro else R.string.desc_favoritar_livro,
+                        tituloTratado
+                    )
                     Icon(
                         imageVector = if (book.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Favorito",
+                        contentDescription = descFavorito,
                         tint = StatusConcluidoLight,
                         modifier = Modifier
                             .size(20.dp)
-                            .clickable { onFavoriteClick() }
+                            .clickable(
+                                role = Role.Button,
+                                onClickLabel = descFavorito,
+                                onClick = onFavoriteClick
+                            )
                     )
+
+                    val descRemover = stringResource(id = R.string.desc_remover_livro, tituloTratado)
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Remover",
+                        contentDescription = descRemover,
                         tint = textSecondaryColor.copy(alpha = 0.6f),
                         modifier = Modifier
                             .size(20.dp)
-                            .clickable { showDeleteDialog = true }
+                            .clickable(
+                                role = Role.Button,
+                                onClickLabel = descRemover,
+                                onClick = { showDeleteDialog = true }
+                            )
                     )
                 }
+
+                // Título, Autor e Data
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -148,7 +205,7 @@ fun BookCard(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = book.title.ifEmpty { "Sem Título" },
+                            text = tituloTratado,
                             fontFamily = Baskervville,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -157,7 +214,7 @@ fun BookCard(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = book.author.ifEmpty { "Autor Desconhecido" },
+                            text = autorTratado,
                             fontFamily = AtkinsonHyperlegible,
                             fontSize = 13.sp,
                             color = textSecondaryColor,
@@ -177,7 +234,7 @@ fun BookCard(
 
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = book.description.ifEmpty { "Nenhuma descrição informada para este livro." },
+                    text = descricaoTratada,
                     fontFamily = AtkinsonHyperlegible,
                     fontSize = 13.sp,
                     color = textPrimaryColor.copy(alpha = 0.9f),
@@ -188,7 +245,15 @@ fun BookCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                // Indicador de Status com Semântica Unificada para Leitores de Tela
+                val descStatusEspeficico = when (book.readingStatus) {
+                    ReadingStatus.CONCLUIDO -> stringResource(id = R.string.desc_livro_status_concluido)
+                    ReadingStatus.EM_ANDAMENTO -> stringResource(id = R.string.desc_livro_status_andamento)
+                }
                 Row(
+                    modifier = Modifier.semantics(mergeDescendants = true) {
+                        contentDescription = "$descStatusEspeficico: ${book.readingStatus.label}"
+                    },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -211,12 +276,19 @@ fun BookCard(
                     )
                 }
 
+                // Rodapé: Avaliação em Estrelas (Limpa e Acessível) + Ação de Editar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    val labelAvaliacao = stringResource(id = R.string.desc_avaliacao_livro, book.rating)
+                    Row(
+                        modifier = Modifier.clearAndSetSemantics {
+                            contentDescription = labelAvaliacao
+                        },
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
                         for (i in 1..5) {
                             val starColor = if (i <= book.rating) Color(0xFFC2D62E) else goldAccent
                             Text(
@@ -227,14 +299,19 @@ fun BookCard(
                         }
                     }
 
+                    val descEditar = stringResource(id = R.string.desc_editar_livro, tituloTratado)
                     Text(
-                        text = "Editar",
+                        text = stringResource(id = R.string.btn_editar),
                         fontFamily = AtkinsonHyperlegible,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (section == BookSection.MEUS_LIVROS) MeusLivrosPrimaryLight else EstanteSecretaPrimaryLight,
                         modifier = Modifier
-                            .clickable { onEditClick() }
+                            .clickable(
+                                role = Role.Button,
+                                onClickLabel = descEditar,
+                                onClick = onEditClick
+                            )
                             .padding(vertical = 4.dp)
                     )
                 }

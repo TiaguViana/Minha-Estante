@@ -1,4 +1,4 @@
-package com.example.testepfv
+package com.example.minhaestante.network
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

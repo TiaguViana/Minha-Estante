@@ -1,4 +1,4 @@
-package com.example.testepfv
+package com.example.minhaestante.ui.screens
 
 import android.app.DatePickerDialog
 import androidx.compose.animation.animateContentSize
@@ -21,16 +21,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.testepfv.ui.theme.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import com.example.minhaestante.R
+import com.example.minhaestante.network.GoogleBooksApiService
+import com.example.minhaestante.ui.theme.AtkinsonHyperlegible
+import com.example.minhaestante.ui.theme.Baskervville
+import com.example.minhaestante.ui.theme.BuscaBordaDark
+import com.example.minhaestante.ui.theme.BuscaBordaLight
+import com.example.minhaestante.ui.theme.BuscaPreenchimentoDark
+import com.example.minhaestante.ui.theme.BuscaPreenchimentoLight
+import com.example.minhaestante.ui.theme.DarkSurface
+import com.example.minhaestante.ui.theme.DarkTextPrimary
+import com.example.minhaestante.ui.theme.DarkTextSecondary
+import com.example.minhaestante.ui.theme.EstanteSecretaPrimaryLight
+import com.example.minhaestante.ui.theme.EstanteSecretaSecondaryLight
+import com.example.minhaestante.ui.theme.LightSurface
+import com.example.minhaestante.ui.theme.LightTextPrimary
+import com.example.minhaestante.ui.theme.LightTextSecondary
+import com.example.minhaestante.ui.theme.MeusLivrosPrimaryLight
+import com.example.minhaestante.ui.theme.MeusLivrosSecondaryLight
+import retrofit2.HttpException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -112,6 +136,7 @@ fun BookModal(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
 
+            // CAMPO BUSCA API
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -129,10 +154,10 @@ fun BookModal(
                                 isSearchingByApi = true
 
                                 try {
-                                    val apiService = GoogleBooksApiService.create()
+                                    val apiService = GoogleBooksApiService.Companion.create()
                                     val response = apiService.searchBooks(
                                         query = query.trim(),
-                                        apiKey = GoogleBooksApiService.MINHA_API_KEY
+                                        apiKey = GoogleBooksApiService.Companion.MINHA_API_KEY
                                     )
 
                                     apiResults = response.items?.map { item ->
@@ -144,7 +169,7 @@ fun BookModal(
                                         )
                                     } ?: emptyList()
 
-                                } catch (e: retrofit2.HttpException) {
+                                } catch (e: HttpException) {
                                     if (e.code() == 429) {
                                         println("DEBUG_API: Bloqueio 429 temporário por excesso de requisições.")
                                     } else {
@@ -162,12 +187,26 @@ fun BookModal(
                             apiResults = emptyList()
                         }
                     },
-                    placeholder = { Text("Buscar livro na API...", color = textSecondaryColor) },
+                    placeholder = { Text(text = stringResource(id = R.string.hint_buscar_api), color = textSecondaryColor) },
                     leadingIcon = {
                         if (isSearchingByApi) {
-                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = goldAccent)
+                            val carregandoTexto = stringResource(id = R.string.desc_carregando_livros)
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .semantics {
+                                        liveRegion = LiveRegionMode.Polite
+                                        contentDescription = carregandoTexto
+                                    },
+                                strokeWidth = 2.dp,
+                                color = goldAccent
+                            )
                         } else {
-                            Icon(Icons.Default.Search, contentDescription = "Buscar via API", tint = goldAccent)
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = stringResource(id = R.string.desc_buscar_api),
+                                tint = goldAccent
+                            )
                         }
                     },
                     singleLine = true,
@@ -183,6 +222,7 @@ fun BookModal(
                     modifier = Modifier.fillMaxWidth().height(50.dp)
                 )
 
+                // RESULTADOS DA API
                 if (apiResults.isNotEmpty()) {
                     Card(
                         modifier = Modifier
@@ -201,10 +241,17 @@ fun BookModal(
                                 .padding(8.dp)
                         ) {
                             items(apiResults) { bookResult ->
+                                val labelResultadoAcessivel = stringResource(
+                                    id = R.string.desc_resultado_livro,
+                                    bookResult.titulo,
+                                    bookResult.autor
+                                )
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable {
+                                        .clickable(
+                                            onClickLabel = labelResultadoAcessivel
+                                        ) {
                                             title = bookResult.titulo
                                             author = bookResult.autor
                                             description = bookResult.descricao
@@ -238,10 +285,11 @@ fun BookModal(
                 }
             }
 
+            // FORMULÁRIO LOCAL
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Título do Livro") },
+                label = { Text(text = stringResource(id = R.string.label_titulo_livro)) },
                 textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = Baskervville, fontSize = 22.sp, fontWeight = FontWeight.Bold),
                 colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = accentColor, unfocusedBorderColor = textSecondaryColor.copy(0.4f)),
                 modifier = Modifier.fillMaxWidth()
@@ -250,7 +298,7 @@ fun BookModal(
             OutlinedTextField(
                 value = author,
                 onValueChange = { author = it },
-                label = { Text("Autor") },
+                label = { Text(text = stringResource(id = R.string.label_autor)) },
                 textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = AtkinsonHyperlegible),
                 colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = accentColor, unfocusedBorderColor = textSecondaryColor.copy(0.4f)),
                 modifier = Modifier.fillMaxWidth()
@@ -259,24 +307,28 @@ fun BookModal(
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Descrição / Sinopse") },
+                label = { Text(text = stringResource(id = R.string.label_descricao)) },
                 textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = AtkinsonHyperlegible),
                 colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = accentColor, unfocusedBorderColor = textSecondaryColor.copy(0.4f)),
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 3
             )
 
+            // DROPDOWN STATUS DE LEITURA
+            val labelStatusAcessivel = stringResource(id = R.string.desc_status_leitura, status.label)
             Box {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(goldBadgeBg)
-                        .clickable { dropdownExpanded = true }
+                        .clickable(
+                            onClickLabel = labelStatusAcessivel
+                        ) { dropdownExpanded = true }
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(text = status.label, color = LightTextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp, fontFamily = AtkinsonHyperlegible)
-                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Expandir opções", tint = LightTextPrimary, modifier = Modifier.size(18.dp))
+                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, tint = LightTextPrimary, modifier = Modifier.size(18.dp))
                     }
                 }
 
@@ -297,19 +349,30 @@ fun BookModal(
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            // AVALIAÇÃO DE ESTRELAS ACESSÍVEL
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.semantics { }
+            ) {
                 for (i in 1..5) {
                     val starColor = if (i <= rating) Color(0xFFC2D62E) else BuscaBordaDark
+                    val labelEstrela = stringResource(id = R.string.desc_avaliar_estrelas, i)
                     Text(
                         text = "★",
                         fontSize = 26.sp,
                         color = starColor,
-                        modifier = Modifier.clickable { rating = i }
+                        modifier = Modifier
+                            .clickable { rating = i }
+                            .clearAndSetSemantics {
+                                contentDescription = labelEstrela
+                            }
                     )
                 }
             }
+
+            // SELETOR DE DATA
             Column {
-                Text(text = "Data de Leitura", fontSize = 14.sp, fontFamily = AtkinsonHyperlegible, color = textPrimaryColor, fontWeight = FontWeight.Medium)
+                Text(text = stringResource(id = R.string.label_data_leitura), fontSize = 14.sp, fontFamily = AtkinsonHyperlegible, color = textPrimaryColor, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(4.dp))
                 OutlinedTextField(
                     value = dateString,
@@ -317,7 +380,11 @@ fun BookModal(
                     readOnly = true,
                     trailingIcon = {
                         IconButton(onClick = { datePickerDialog.show() }) {
-                            Icon(imageVector = Icons.Default.DateRange, contentDescription = "Abrir calendário", tint = goldAccent)
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = stringResource(id = R.string.desc_abrir_calendario),
+                                tint = goldAccent
+                            )
                         }
                     },
                     shape = RoundedCornerShape(12.dp),
@@ -332,29 +399,37 @@ fun BookModal(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+
+            // BOTÕES DE AÇÃO DO RODAPÉ
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val labelCancelar = stringResource(id = R.string.desc_btn_cancelar)
                 Text(
-                    text = "Cancelar",
+                    text = stringResource(id = R.string.btn_cancelar),
                     fontFamily = AtkinsonHyperlegible,
                     color = accentColor,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onDismiss() }
+                    modifier = Modifier
+                        .clickable(onClickLabel = labelCancelar) { onDismiss() }
+                        .clearAndSetSemantics { contentDescription = labelCancelar }
                 )
 
+                val labelSalvar = stringResource(id = R.string.desc_btn_salvar)
                 Text(
-                    text = "Salvar",
+                    text = stringResource(id = R.string.btn_salvar),
                     fontFamily = AtkinsonHyperlegible,
                     color = goldAccent,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        if (title.isNotEmpty()) {
-                            onSave(title, author, description, status, rating, calendar.time, imageUrl.ifBlank { null })
+                    modifier = Modifier
+                        .clickable(onClickLabel = labelSalvar) {
+                            if (title.isNotEmpty()) {
+                                onSave(title, author, description, status, rating, calendar.time, imageUrl.ifBlank { null })
+                            }
                         }
-                    }
+                        .clearAndSetSemantics { contentDescription = labelSalvar }
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -362,11 +437,21 @@ fun BookModal(
     }
 }
 
-data class ApiBookResult(val titulo: String, val autor: String, val descricao: String, val imageUrl: String)
+// 👈 Data Class corrigida (removido o parâmetro redundante/conflitante 'description')
+data class ApiBookResult(
+    val titulo: String,
+    val autor: String,
+    val descricao: String,
+    val imageUrl: String
+)
 
-private suspend fun buscarLivrosNaApiReal(nomeLivro: String): List<ApiBookResult>? = withContext(Dispatchers.IO) {
+private suspend fun buscarLivrosNaApiReal(context: android.content.Context, nomeLivro: String): List<ApiBookResult>? = withContext(Dispatchers.IO) {
     val listaResultados = mutableListOf<ApiBookResult>()
     var urlConnection: HttpURLConnection? = null
+
+    val stringSemTitulo = context.getString(R.string.api_sem_titulo)
+    val stringAutorDesconhecido = context.getString(R.string.api_autor_desconhecido)
+    val stringSemSinopse = context.getString(R.string.api_sem_sinopse)
 
     try {
         val queryAdulterada = URLEncoder.encode(nomeLivro.trim(), "UTF-8")
@@ -397,14 +482,14 @@ private suspend fun buscarLivrosNaApiReal(nomeLivro: String): List<ApiBookResult
                 for (i in 0 until items.length()) {
                     val volumeInfo = items.getJSONObject(i).getJSONObject("volumeInfo")
 
-                    val titulo = volumeInfo.optString("title", "Sem Título")
+                    val titulo = volumeInfo.optString("title", stringSemTitulo)
                     val autoresArray = volumeInfo.optJSONArray("authors")
                     val autor = if (autoresArray != null && autoresArray.length() > 0) {
                         autoresArray.getString(0)
                     } else {
-                        "Autor Desconhecido"
+                        stringAutorDesconhecido
                     }
-                    val textoDescricao = volumeInfo.optString("description", "Nenhuma sinopse disponível para este livro.")
+                    val textoDescricao = volumeInfo.optString("description", stringSemSinopse)
 
                     val imageLinks = volumeInfo.optJSONObject("imageLinks")
                     val thumb = imageLinks?.optString("thumbnail") ?: ""

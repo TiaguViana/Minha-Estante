@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.testepfv"
+    namespace = "com.example.minhaestante"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.example.testepfv"
+        applicationId = "com.example.minhaestante"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
@@ -60,4 +60,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
 }
