@@ -24,11 +24,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,17 +40,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.minhaestante.R
+import com.example.minhaestante.data.repository.FirebaseRepo
 import com.example.minhaestante.ui.theme.AtkinsonHyperlegible
 import com.example.minhaestante.ui.theme.Baskervville
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(
@@ -58,12 +56,13 @@ fun LoginScreen(
     onNavigateToCadastro: () -> Unit
 ) {
     val context = LocalContext.current
-    val auth = remember { FirebaseAuth.getInstance() }
+    val firebaseRepo = remember { FirebaseRepo() } // Instanciando o repositório
     val darkTheme = isSystemInDarkTheme()
 
     // Estados de validação local
     var vazioEmail by remember { mutableStateOf(false) }
     var erroSenha by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) } // Estado de carregamento
 
     // Estados dos campos de entrada
     var email by remember { mutableStateOf("") }
@@ -178,28 +177,40 @@ fun LoginScreen(
                         }
 
                         if (!vazioEmail && erroSenha == null) {
-                            auth.signInWithEmailAndPassword(email, senha)
-                                .addOnSuccessListener {
+                            isLoading = true // Inicia o carregamento
+
+                            // Usando a função do FirebaseRepo
+                            firebaseRepo.loginUsuario(
+                                email = email,
+                                senha = senha,
+                                onSuccess = {
+                                    isLoading = false
                                     Toast.makeText(context, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show()
-                                    onLoginSuccess()
+                                    onLoginSuccess() // Vai para a MainScreen
+                                },
+                                onFailure = { erro ->
+                                    isLoading = false
+                                    Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
                                 }
-                                .addOnFailureListener { e ->
-                                    // Texto puro e limpo sem ler arquivos xml de strings
-                                    Toast.makeText(context, "Erro ao entrar: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                                }
+                            )
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
+                    enabled = !isLoading, // Desativa se estiver carregando
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
-                    Text(
-                        text = "Entrar",
-                        color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary,
-                        fontSize = 18.sp,
-                        fontFamily = Baskervville,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.primary)
+                    } else {
+                        Text(
+                            text = "Entrar",
+                            color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary,
+                            fontSize = 18.sp,
+                            fontFamily = Baskervville,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

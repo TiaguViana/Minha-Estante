@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.minhaestante.R
+import com.example.minhaestante.data.repository.FirebaseRepo
 import com.example.minhaestante.ui.theme.AtkinsonHyperlegible
 import com.example.minhaestante.ui.theme.Baskervville
 import com.example.minhaestante.ui.theme.BuscaBordaDark
@@ -46,7 +47,6 @@ import com.example.minhaestante.ui.theme.MeusLivrosSecondaryLight
 import com.example.minhaestante.utils.BiometricHelper.autenticar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -56,17 +56,16 @@ fun MainScreen() {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
 
-    val coroutineScope = rememberCoroutineScope()
-    val repository = remember { com.example.minhaestante.data.BookRepository() }
+    // Injeção do nosso Repositório
+    val repository = remember { FirebaseRepo() }
 
-    // 👇 Instâncias do Firebase para buscar o nome dinamicamente
     val auth = remember { FirebaseAuth.getInstance() }
     val firestore = remember { FirebaseFirestore.getInstance() }
 
     val stringCarregando = stringResource(id = R.string.usuario_carregando)
     var nomeUsuario by remember { mutableStateOf(stringCarregando) }
 
-    // Efeito para escutar as mudanças do nome do usuário logado no Firestore
+    // Carrega o nome do usuário ativo
     LaunchedEffect(Unit) {
         val uid = auth.currentUser?.uid
         if (uid != null) {
@@ -87,12 +86,17 @@ fun MainScreen() {
     val textSecondaryColor = if (isDark) DarkTextSecondary else LightTextSecondary
     val goldAccent = if (isDark) BuscaBordaDark else BuscaBordaLight
 
+    // Conexão em tempo real com o Firestore para buscar a lista
     val booksList by repository.getBooks().collectAsState(initial = emptyList())
-    var selectedTab by remember { mutableStateOf(0) } // 0 = Meus Livros, 1 = Estante Secreta
+
+    var selectedTab by remember { mutableStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
     var isDescendingOrder by remember { mutableStateOf(true) }
     var filterOnlyFavorites by remember { mutableStateOf(false) }
+
     val currentSection = if (selectedTab == 0) BookSection.MEUS_LIVROS else BookSection.ESTANTE_SECRETA
+
+    // A sua lógica impecável de filtros
     val filteredBooks = booksList.filter { book ->
         val matchesTab = book.section == currentSection
         val matchesSearch = book.title.contains(searchQuery, ignoreCase = true) ||
@@ -130,7 +134,7 @@ fun MainScreen() {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Região de Boas-vindas Dinâmica
+            // SAUDAÇÃO
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(id = R.string.saudacao_ola),
@@ -144,7 +148,7 @@ fun MainScreen() {
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = nomeUsuario, // 👈 Agora exibe o nome vindo do Firebase
+                        text = nomeUsuario,
                         fontSize = 28.sp,
                         fontFamily = Baskervville,
                         fontWeight = FontWeight.Bold,
@@ -217,7 +221,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // BUSCA E BOTÃO ADICIONAR (Com descrições acessíveis para TalkBack)
+            // BUSCA E BOTÃO ADICIONAR
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -232,7 +236,7 @@ fun MainScreen() {
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = stringResource(id = R.string.desc_campo_busca), // 👈 Acessibilidade
+                            contentDescription = stringResource(id = R.string.desc_campo_busca),
                             tint = goldAccent
                         )
                     },
@@ -257,7 +261,7 @@ fun MainScreen() {
                         .size(44.dp)
                         .border(1.5.dp, goldAccent, RoundedCornerShape(22.dp))
                         .clickable(
-                            onClickLabel = stringResource(id = R.string.desc_botao_adicionar) // 👈 Fornece dica de clique para leitores de tela
+                            onClickLabel = stringResource(id = R.string.desc_botao_adicionar)
                         ) {
                             bookToEdit = null
                             showModal = true
@@ -266,7 +270,7 @@ fun MainScreen() {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(id = R.string.desc_botao_adicionar), // 👈 Acessibilidade
+                        contentDescription = stringResource(id = R.string.desc_botao_adicionar),
                         tint = goldAccent,
                         modifier = Modifier.size(24.dp)
                     )
@@ -275,7 +279,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // FILTROS E CONTEÚDOS
+            // FILTROS
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -295,7 +299,7 @@ fun MainScreen() {
                 ) {
                     Icon(
                         imageVector = if (filterOnlyFavorites) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = stringResource(id = R.string.desc_filtrar_favoritos), // 👈 Acessibilidade
+                        contentDescription = stringResource(id = R.string.desc_filtrar_favoritos),
                         tint = if (filterOnlyFavorites) goldAccent else CorDestaque,
                         modifier = Modifier
                             .size(22.dp)
@@ -316,7 +320,6 @@ fun MainScreen() {
                         )
                         Icon(
                             imageVector = if (isDescendingOrder) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
-                            // Descrição de acessibilidade dinâmica baseada no estado do botão 👇
                             contentDescription = stringResource(
                                 id = if (isDescendingOrder) R.string.desc_mudar_ordenacao_recentes else R.string.desc_mudar_ordenacao_antigos
                             ),
@@ -329,6 +332,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // LISTA DE LIVROS
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -358,14 +362,10 @@ fun MainScreen() {
                                 showModal = true
                             },
                             onDeleteClick = {
-                                coroutineScope.launch {
-                                    repository.deleteBook(book.id)
-                                }
+                                repository.deleteBook(book.id)
                             },
                             onFavoriteClick = {
-                                coroutineScope.launch {
-                                    repository.saveBook(book.copy(isFavorite = !book.isFavorite))
-                                }
+                                repository.saveBook(book.copy(isFavorite = !book.isFavorite))
                             }
                         )
                     }
@@ -380,33 +380,31 @@ fun MainScreen() {
             section = currentSection,
             onDismiss = { showModal = false },
             onSave = { title, author, desc, status, rating, date, imageUrl ->
-                coroutineScope.launch {
-                    if (bookToEdit == null) {
-                        val newBook = Book(
-                            id = UUID.randomUUID().toString(),
-                            title = title,
-                            author = author,
-                            description = desc,
-                            readingStatus = status,
-                            rating = rating,
-                            readingDate = date,
-                            imageUrl = imageUrl,
-                            isFavorite = false,
-                            section = currentSection
-                        )
-                        repository.saveBook(newBook)
-                    } else {
-                        val updatedBook = bookToEdit!!.copy(
-                            title = title,
-                            author = author,
-                            description = desc,
-                            readingStatus = status,
-                            rating = rating,
-                            readingDate = date,
-                            imageUrl = imageUrl
-                        )
-                        repository.saveBook(updatedBook)
-                    }
+                if (bookToEdit == null) {
+                    val newBook = Book(
+                        // O ID já é criado automaticamente pela sua classe Book!
+                        title = title,
+                        author = author,
+                        description = desc,
+                        readingStatus = status,
+                        rating = rating,
+                        readingDate = date,
+                        imageUrl = imageUrl,
+                        isFavorite = false,
+                        section = currentSection
+                    )
+                    repository.saveBook(newBook)
+                } else {
+                    val updatedBook = bookToEdit!!.copy(
+                        title = title,
+                        author = author,
+                        description = desc,
+                        readingStatus = status,
+                        rating = rating,
+                        readingDate = date,
+                        imageUrl = imageUrl
+                    )
+                    repository.saveBook(updatedBook)
                 }
                 showModal = false
             }

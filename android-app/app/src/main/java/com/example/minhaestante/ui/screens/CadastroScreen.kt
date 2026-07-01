@@ -1,6 +1,5 @@
 package com.example.minhaestante.ui.screens
 
-//////////////////////////////// imports //////////////////////////////////////
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -26,19 +25,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.minhaestante.R
-import com.example.minhaestante.data.User
+import com.example.minhaestante.data.repository.FirebaseRepo
 import com.example.minhaestante.ui.theme.Baskervville
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun CadastroScreen(
     onCadastroSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    val auth = remember { FirebaseAuth.getInstance() }
-    val firestore = remember { FirebaseFirestore.getInstance() }
+    val firebaseRepo = remember { FirebaseRepo() } // Instanciando o repositório
 
     // Variáveis de estado
     val darkTheme = isSystemInDarkTheme()
@@ -49,6 +44,7 @@ fun CadastroScreen(
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var vizivelSenha by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -161,7 +157,7 @@ fun CadastroScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // BOTAO CADASTRAR
+                // BOTÃO CADASTRAR
                 Button(
                     onClick = {
                         vazioEmail = email.isEmpty()
@@ -173,43 +169,39 @@ fun CadastroScreen(
                         }
 
                         if (!vazioEmail && !vazioUsuario && erroSenha == null) {
-                            auth.createUserWithEmailAndPassword(email, senha)
-                                .addOnSuccessListener { authResult ->
-                                    val uid = authResult.user?.uid
-                                    if (uid != null) {
-                                        val novoUsuario = User(
-                                            nome = usuario,
-                                            email = email,
-                                            status = "ativo",
-                                            cadastro = Timestamp.now(),
-                                            isAdmin = false
-                                        )
-                                        firestore.collection("usuarios").document(uid).set(novoUsuario)
-                                            .addOnSuccessListener {
-                                                Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
-                                                onCadastroSuccess()
-                                            }
-                                            .addOnFailureListener { e ->
-                                                Toast.makeText(context, "Erro ao salvar perfil: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                                            }
-                                    }
+                            isLoading = true
+                            firebaseRepo.cadastrarUsuario(
+                                nome = usuario,
+                                email = email,
+                                senha = senha,
+                                onSuccess = {
+                                    isLoading = false
+                                    Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
+                                    onCadastroSuccess()
+                                },
+                                onFailure = { erro ->
+                                    isLoading = false
+                                    Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
                                 }
-                                .addOnFailureListener { e ->
-                                    Toast.makeText(context, "Erro na autenticação: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                                }
+                            )
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
+                    enabled = !isLoading,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
-                    Text(
-                        text = "Cadastrar",
-                        fontFamily = Baskervville,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.primary)
+                    } else {
+                        Text(
+                            text = "Cadastrar",
+                            fontFamily = Baskervville,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }
