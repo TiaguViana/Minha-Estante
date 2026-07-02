@@ -1,4 +1,3 @@
-// Arquivo: src/components/UserTable.js
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';

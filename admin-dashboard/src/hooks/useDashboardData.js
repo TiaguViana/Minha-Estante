@@ -1,4 +1,3 @@
-// Arquivo: src/hooks/useDashboardData.js
 import { useState, useEffect } from 'react';
 import {
   collection,

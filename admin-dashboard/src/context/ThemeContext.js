@@ -1,4 +1,3 @@
-// Arquivo: src/context/ThemeContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colorsLight, colorsDark } from '../styles/colors';
@@ -13,7 +12,6 @@ export function ThemeProvider({ children }) {
 
   const [carregandoTema, setCarregandoTema] = useState(true);
 
-  // Lê a preferência salva assim que o app abre
   useEffect(() => {
     async function carregarTemaSalvo() {
       try {
@@ -22,7 +20,6 @@ export function ThemeProvider({ children }) {
           setDarkMode(valorSalvo === 'dark');
         }
       } catch (erro) {
-        // Se der erro na leitura, só segue com o padrão (modo claro)
         console.warn('Não foi possível carregar o tema salvo:', erro);
       } finally {
         setCarregandoTema(false);

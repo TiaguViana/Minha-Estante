@@ -1,4 +1,3 @@
-// Arquivo: src/components/MetricCard.js
 import React from 'react';
 import { StyleSheet, View, Text, Image } from 'react-native';
 import { useTheme } from '../context/ThemeContext';

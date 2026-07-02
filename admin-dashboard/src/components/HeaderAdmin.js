@@ -1,4 +1,3 @@
-// Arquivo: src/components/HeaderAdmin.js
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, TextInput, Text, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';

@@ -1,4 +1,3 @@
-// Arquivo: src/screens/SplashScreen.js
 import { View, Image } from "react-native";
 import { useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";

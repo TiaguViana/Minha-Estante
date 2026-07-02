@@ -1,4 +1,3 @@
-// Arquivo: src/screens/LoginScreen.js
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from "react-native";
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';

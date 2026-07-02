@@ -1,4 +1,3 @@
-// Arquivo: src/screens/DashboardScreen.js
 import React from 'react';
 import { StyleSheet, View, ScrollView, Text, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';

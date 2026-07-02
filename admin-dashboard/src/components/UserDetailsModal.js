@@ -1,4 +1,3 @@
-// Arquivo: src/components/UserDetailsModal.js
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
