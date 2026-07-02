@@ -1,19 +1,19 @@
 // Arquivo: src/components/HeaderAdmin.js
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, TextInput, Text, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { typography } from '../styles';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/UseAuth';
 import ConfirmModal from './ConfirmModal';
 
 export default function HeaderAdmin({
-  adminRole = 'Admin',
   avatarSource = require('../../assets/icons/avatar.png'),
   searchValue,
   onSearchChange,
   onSearchSubmit,
-  searchPlaceholder = 'Buscar Usuários, Livros...',
 }) {
+  const { t } = useTranslation();
   const { darkMode, toggleTheme, colors } = useTheme();
   const { user, sair } = useAuth();
   const styles = getStyles(colors);
@@ -23,7 +23,8 @@ export default function HeaderAdmin({
 
   const valorDaBusca = searchValue !== undefined ? searchValue : internalSearch;
   const aoMudarBusca = onSearchChange || setInternalSearch;
-  const adminName = user?.displayName || user?.email || 'Administrador';
+  const adminName = user?.displayName || user?.email || t('header.admin');
+  const adminRole = t('header.admin');
 
   return (
     <View style={styles.header}>
@@ -37,7 +38,7 @@ export default function HeaderAdmin({
               : require('../../assets/logo/logoD.png')
           }
           accessible
-          accessibilityLabel="Minha Estante — logotipo"
+          accessibilityLabel={t('login.logoA11y')}
           accessibilityRole="image"
         />
 
@@ -46,19 +47,19 @@ export default function HeaderAdmin({
             source={require('../../assets/icons/Search.png')}
             style={styles.inputIcon}
             accessible
-            accessibilityLabel="Ícone de busca"
+            accessibilityLabel={t('header.buscaA11yLabel')}
             accessibilityRole="image"
           />
           <TextInput
-            placeholder={searchPlaceholder}
+            placeholder={t('header.buscarPlaceholder')}
             placeholderTextColor={colors.searchbarText}
             style={styles.searchInput}
             value={valorDaBusca}
             onChangeText={aoMudarBusca}
             onSubmitEditing={onSearchSubmit}
             returnKeyType="search"
-            accessibilityLabel="Campo de busca"
-            accessibilityHint="Digite para buscar usuários ou livros"
+            accessibilityLabel={t('header.buscaA11yLabel')}
+            accessibilityHint={t('header.buscaA11yHint')}
           />
         </View>
 
@@ -84,7 +85,6 @@ export default function HeaderAdmin({
               <Text style={styles.nameText} numberOfLines={1}>{adminName}</Text>
             </View>
 
-            {/* Botão de logout — abre o modal de confirmação */}
             <TouchableOpacity
               style={styles.logoutButton}
               onPress={() => setModalLogoutVisivel(true)}
@@ -92,8 +92,8 @@ export default function HeaderAdmin({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               accessible
               accessibilityRole="button"
-              accessibilityLabel="Sair da conta"
-              accessibilityHint="Abre confirmação para encerrar a sessão"
+              accessibilityLabel={t('header.sairConta')}
+              accessibilityHint={t('header.sairA11yHint')}
             >
               <Image
                 source={require('../../assets/icons/logout1.png')}
@@ -109,7 +109,7 @@ export default function HeaderAdmin({
             activeOpacity={0.8}
             accessible
             accessibilityRole="switch"
-            accessibilityLabel="Alternar modo escuro"
+            accessibilityLabel={t('header.alternarModoEscuro')}
             accessibilityState={{ checked: darkMode }}
           >
             <View style={[styles.toggleCircle, darkMode && styles.toggleCircleActive]}>
@@ -131,11 +131,9 @@ export default function HeaderAdmin({
         </View>
       </View>
 
-      {/* Modal de confirmação de logout */}
       <ConfirmModal
         visible={modalLogoutVisivel}
-        userName="sua sessão"
-        mensagem="Deseja encerrar sua sessão?"
+        mensagem={t('header.logoutMensagem')}
         onConfirmar={() => {
           setModalLogoutVisivel(false);
           sair();

@@ -1,6 +1,7 @@
 // Arquivo: src/components/UserTable.js
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import UserDetailsModal from './UserDetailsModal';
 import { useTheme } from '../context/ThemeContext';
 
@@ -17,6 +18,7 @@ export default function UserTable({
   onExportarCSV,
   exportando = false,
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = getStyles(colors);
 
@@ -34,19 +36,19 @@ export default function UserTable({
     <View style={styles.card}>
 
       <View style={styles.tituloRow}>
-        <Text style={styles.titulo}>Lista de Usuários</Text>
+        <Text style={styles.titulo}>{t('table.listaUsuarios')}</Text>
 
         <TouchableOpacity
           style={[styles.exportarBotao, exportando && styles.exportarBotaoDesabilitado]}
           onPress={onExportarCSV}
           disabled={exportando}
           accessibilityRole="button"
-          accessibilityLabel="Exportar lista de usuários em CSV"
+          accessibilityLabel={t('table.exportarA11y')}
         >
           {exportando ? (
             <ActivityIndicator size="small" color={colors.tableHeaderText} />
           ) : (
-            <Text style={styles.exportarTexto}>⬇ Exportar CSV</Text>
+            <Text style={styles.exportarTexto}>⬇ {t('table.exportarCsv')}</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -57,24 +59,24 @@ export default function UserTable({
           onPress={() => onOrdenar && onOrdenar('nome')}
           disabled={ordenacaoDesabilitada}
         >
-          <Text style={styles.headerCell}>Usuário<IconeOrdenacao campo="nome" /></Text>
+          <Text style={styles.headerCell}>{t('table.colUsuario')}<IconeOrdenacao campo="nome" /></Text>
         </TouchableOpacity>
-        <Text style={[styles.headerCell, styles.colStatus]}>Status</Text>
+        <Text style={[styles.headerCell, styles.colStatus]}>{t('table.colStatus')}</Text>
         <TouchableOpacity
           style={[styles.colCadastro]}
           onPress={() => onOrdenar && onOrdenar('cadastro')}
           disabled={ordenacaoDesabilitada}
         >
-          <Text style={styles.headerCell}>Cadastro<IconeOrdenacao campo="cadastro" /></Text>
+          <Text style={styles.headerCell}>{t('table.colCadastro')}<IconeOrdenacao campo="cadastro" /></Text>
         </TouchableOpacity>
-        <Text style={[styles.headerCell, styles.colLivros]}>Livros</Text>
-        <Text style={[styles.headerCell, styles.colEstantes]}>Estantes Secretas</Text>
-        <Text style={[styles.headerCell, styles.colAcoes]}>Ações</Text>
+        <Text style={[styles.headerCell, styles.colLivros]}>{t('table.colLivros')}</Text>
+        <Text style={[styles.headerCell, styles.colEstantes]}>{t('table.colEstantes')}</Text>
+        <Text style={[styles.headerCell, styles.colAcoes]}>{t('table.colAcoes')}</Text>
       </View>
 
       {data.length === 0 ? (
         <View style={styles.vazioContainer}>
-          <Text style={styles.vazioTexto}>Nenhum usuário encontrado.</Text>
+          <Text style={styles.vazioTexto}>{t('table.nenhumUsuario')}</Text>
         </View>
       ) : (
         data.map(function (usuario, index) {
@@ -98,7 +100,7 @@ export default function UserTable({
                   ]}
                 />
                 <Text style={styles.statusText}>
-                  {isAtivo ? 'Ativo' : 'Inativo'}
+                  {isAtivo ? t('table.ativo') : t('table.inativo')}
                 </Text>
               </View>
 
@@ -110,10 +112,10 @@ export default function UserTable({
                 <TouchableOpacity
                   onPress={function () { setUsuarioDetalhes(usuario); }}
                   style={styles.detalhesButton}
-                  accessibilityLabel={'Ver detalhes de ' + usuario.name}
+                  accessibilityLabel={t('table.verDetalhesA11y', { nome: usuario.name })}
                   accessibilityRole="button"
                 >
-                  <Text style={styles.detalhesTexto}>👁 Ver detalhes</Text>
+                  <Text style={styles.detalhesTexto}>👁 {t('table.verDetalhes')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -124,8 +126,8 @@ export default function UserTable({
       <View style={styles.paginacaoRow}>
         <Text style={styles.paginacaoInfo}>
           {totalRegistros > 0
-            ? inicioRegistro + ' a ' + fimRegistro + ' de ' + totalRegistros + ' registros'
-            : 'Nenhum registro'}
+            ? t('table.registrosInfo', { inicio: inicioRegistro, fim: fimRegistro, total: totalRegistros })
+            : t('table.nenhumRegistro')}
         </Text>
 
         <View style={styles.paginacaoControles}>
@@ -136,17 +138,17 @@ export default function UserTable({
             ]}
             onPress={function () { if (onPageChange) onPageChange(currentPage - 1); }}
             disabled={currentPage <= 1}
-            accessibilityLabel="Página anterior"
+            accessibilityLabel={t('table.paginaAnteriorA11y')}
           >
             <Text style={styles.paginacaoSeta}>{'<'}</Text>
           </TouchableOpacity>
 
           <Text style={styles.paginacaoTexto}>
-            {'Página '}
+            {t('table.pagina')}{' '}
             <Text style={styles.paginacaoDestaque}>
               {String(currentPage).padStart(2, '0')}
             </Text>
-            {'  de  '}
+            {'  '}{t('table.de')}{'  '}
             <Text style={styles.paginacaoDestaque}>
               {String(totalPages).padStart(2, '0')}
             </Text>
@@ -159,7 +161,7 @@ export default function UserTable({
             ]}
             onPress={function () { if (onPageChange) onPageChange(currentPage + 1); }}
             disabled={currentPage >= totalPages}
-            accessibilityLabel="Próxima página"
+            accessibilityLabel={t('table.proximaPaginaA11y')}
           >
             <Text style={styles.paginacaoSeta}>{'>'}</Text>
           </TouchableOpacity>

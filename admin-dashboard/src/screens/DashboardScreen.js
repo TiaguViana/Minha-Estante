@@ -1,6 +1,7 @@
 // Arquivo: src/screens/DashboardScreen.js
 import React from 'react';
 import { StyleSheet, View, ScrollView, Text, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import MetricCard from '../components/MetricCard';
 import HeaderAdmin from '../components/HeaderAdmin';
 import UserTable from '../components/UserTable';
@@ -10,6 +11,7 @@ import { useDashboardData } from '../hooks/useDashboardData';
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const styles = getStyles(colors);
 
   const {
@@ -47,27 +49,27 @@ export default function DashboardScreen() {
       />
 
       <View style={styles.contentLayout}>
-        <Text style={styles.mainTitle}>Gerenciamento de Usuários</Text>
+        <Text style={styles.mainTitle}>{t('dashboard.titulo')}</Text>
 
         <View style={styles.metricsRow}>
           <MetricCard
             variant="purple"
             icon={require('../../assets/icons/lucide_users.png')}
             value={String(totalUsuarios)}
-            label="Usuários no Sistema"
+            label={t('dashboard.usuariosNoSistema')}
           />
           <MetricCard
             variant="green"
             icon={require('../../assets/icons/tabler_book.png')}
             value={String(totalLivros)}
-            label="Livros Cadastrados"
+            label={t('dashboard.livrosCadastrados')}
           />
           <MetricCard
             variant="gold"
             icon={require('../../assets/icons/book.png')}
             tintIcon={false}
             value={String(totalEstantesSecretas)}
-            label="Estantes Secretas Ativas"
+            label={t('dashboard.estantesSecretasAtivas')}
           />
         </View>
 

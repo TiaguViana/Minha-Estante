@@ -1,8 +1,11 @@
 // Arquivo: src/components/UserDetailsModal.js
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function UserDetailsModal({ visible, usuario, onFechar }) {
+  const { t } = useTranslation();
+
   if (!usuario) return null;
 
   const isAtivo = usuario.status === 'ativo';
@@ -11,38 +14,38 @@ export default function UserDetailsModal({ visible, usuario, onFechar }) {
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onFechar}>
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onFechar}>
         <TouchableOpacity activeOpacity={1} style={styles.card}>
-          <Text style={styles.titulo}>Detalhes do Usuário</Text>
+          <Text style={styles.titulo}>{t('userDetails.titulo')}</Text>
 
           <View style={styles.linha}>
-            <Text style={styles.rotulo}>Nome</Text>
+            <Text style={styles.rotulo}>{t('userDetails.nome')}</Text>
             <Text style={styles.valor}>{usuario.name}</Text>
           </View>
 
           <View style={styles.linha}>
-            <Text style={styles.rotulo}>E-mail</Text>
+            <Text style={styles.rotulo}>{t('userDetails.email')}</Text>
             <Text style={styles.valor}>{usuario.email || '—'}</Text>
           </View>
 
           <View style={styles.linha}>
-            <Text style={styles.rotulo}>Status</Text>
+            <Text style={styles.rotulo}>{t('userDetails.status')}</Text>
             <View style={styles.statusCell}>
               <View style={[styles.statusDot, { backgroundColor: isAtivo ? '#4CAF50' : '#C0392B' }]} />
-              <Text style={styles.valor}>{isAtivo ? 'Ativo' : 'Inativo'}</Text>
+              <Text style={styles.valor}>{isAtivo ? t('table.ativo') : t('table.inativo')}</Text>
             </View>
           </View>
 
           <View style={styles.linha}>
-            <Text style={styles.rotulo}>Cadastro</Text>
+            <Text style={styles.rotulo}>{t('userDetails.cadastro')}</Text>
             <Text style={styles.valor}>{usuario.cadastro}</Text>
           </View>
 
           <View style={styles.linha}>
-            <Text style={styles.rotulo}>Livros cadastrados</Text>
+            <Text style={styles.rotulo}>{t('userDetails.livrosCadastrados')}</Text>
             <Text style={styles.valor}>{usuario.livros}</Text>
           </View>
 
           <View style={styles.linha}>
-            <Text style={styles.rotulo}>Estantes secretas</Text>
+            <Text style={styles.rotulo}>{t('userDetails.estantesSecretas')}</Text>
             <Text style={styles.valor}>{usuario.estantes}</Text>
           </View>
 
@@ -50,9 +53,9 @@ export default function UserDetailsModal({ visible, usuario, onFechar }) {
             onPress={onFechar}
             style={styles.botaoFechar}
             accessibilityRole="button"
-            accessibilityLabel="Fechar detalhes do usuário"
+            accessibilityLabel={t('userDetails.fecharA11y')}
           >
-            <Text style={styles.textoFechar}>Fechar</Text>
+            <Text style={styles.textoFechar}>{t('common.fechar')}</Text>
           </TouchableOpacity>
         </TouchableOpacity>
       </TouchableOpacity>

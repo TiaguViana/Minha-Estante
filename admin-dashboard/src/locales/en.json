@@ -1,0 +1,86 @@
+{
+  "common": {
+    "cancelar": "Cancel",
+    "confirmar": "Confirm",
+    "fechar": "Close"
+  },
+  "login": {
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email",
+    "emailA11yLabel": "Email field",
+    "emailA11yHint": "Enter your email address",
+    "senhaLabel": "Password",
+    "senhaPlaceholder": "Enter your password",
+    "senhaA11yLabel": "Password field",
+    "senhaA11yHint": "Enter your access password",
+    "mostrarSenha": "Show password",
+    "ocultarSenha": "Hide password",
+    "alternarVisibilidadeSenha": "Toggles the visibility of the entered password",
+    "redefinirSenha": "Reset Password",
+    "redefinirSenhaA11y": "Reset password",
+    "enviando": "Sending...",
+    "enviandoA11y": "Sending reset email",
+    "entrar": "Log In",
+    "entrando": "Logging in...",
+    "entrandoA11y": "Logging in, please wait",
+    "entrarSistemaA11y": "Log into the system",
+    "logoA11y": "Minha Estante — logo",
+    "resetEmailVazio": "Enter your email above before resetting your password.",
+    "resetSucesso": "Reset email sent! Check your inbox (and spam folder).",
+    "resetErroInvalido": "This email doesn't look valid. Check it and try again.",
+    "resetErroMuitasTentativas": "Too many attempts in a row. Wait a moment before trying again.",
+    "resetErroGenerico": "Couldn't send the email right now. Please try again shortly."
+  },
+  "header": {
+    "buscarPlaceholder": "Search users, books...",
+    "buscaA11yLabel": "Search field",
+    "buscaA11yHint": "Type to search users or books",
+    "sairConta": "Log out",
+    "sairA11yHint": "Opens confirmation to end your session",
+    "logoutMensagem": "Do you want to end your session?",
+    "alternarModoEscuro": "Toggle dark mode",
+    "admin": "Admin"
+  },
+  "dashboard": {
+    "titulo": "User Management",
+    "usuariosNoSistema": "Users in the System",
+    "livrosCadastrados": "Books Registered",
+    "estantesSecretasAtivas": "Active Secret Shelves"
+  },
+  "table": {
+    "listaUsuarios": "User List",
+    "exportarCsv": "Export CSV",
+    "exportarA11y": "Export user list as CSV",
+    "colUsuario": "User",
+    "colStatus": "Status",
+    "colCadastro": "Registered",
+    "colLivros": "Books",
+    "colEstantes": "Secret Shelves",
+    "colAcoes": "Actions",
+    "ativo": "Active",
+    "inativo": "Inactive",
+    "verDetalhes": "View details",
+    "verDetalhesA11y": "View details of {{nome}}",
+    "nenhumUsuario": "No users found.",
+    "nenhumRegistro": "No records",
+    "registrosInfo": "{{inicio}} to {{fim}} of {{total}} records",
+    "paginaAnteriorA11y": "Previous page",
+    "proximaPaginaA11y": "Next page",
+    "pagina": "Page",
+    "de": "of"
+  },
+  "userDetails": {
+    "titulo": "User Details",
+    "nome": "Name",
+    "email": "Email",
+    "status": "Status",
+    "cadastro": "Registered",
+    "livrosCadastrados": "Books registered",
+    "estantesSecretas": "Secret shelves",
+    "fecharA11y": "Close user details"
+  },
+  "confirmModal": {
+    "desativarComNome": "Do you want to deactivate \"{{nome}}\"?",
+    "desativarGenerico": "Do you want to deactivate this user?"
+  }
+}

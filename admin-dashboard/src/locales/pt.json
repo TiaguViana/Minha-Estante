@@ -1,0 +1,86 @@
+{
+  "common": {
+    "cancelar": "Cancelar",
+    "confirmar": "Confirmar",
+    "fechar": "Fechar"
+  },
+  "login": {
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "Insira seu E-mail",
+    "emailA11yLabel": "Campo de e-mail",
+    "emailA11yHint": "Digite seu endereço de e-mail",
+    "senhaLabel": "Senha",
+    "senhaPlaceholder": "Insira sua senha",
+    "senhaA11yLabel": "Campo de senha",
+    "senhaA11yHint": "Digite sua senha de acesso",
+    "mostrarSenha": "Mostrar senha",
+    "ocultarSenha": "Ocultar senha",
+    "alternarVisibilidadeSenha": "Alterna a visibilidade da senha digitada",
+    "redefinirSenha": "Redefinir Senha",
+    "redefinirSenhaA11y": "Redefinir senha",
+    "enviando": "Enviando...",
+    "enviandoA11y": "Enviando e-mail de redefinição",
+    "entrar": "Entrar",
+    "entrando": "Entrando...",
+    "entrandoA11y": "Entrando, aguarde",
+    "entrarSistemaA11y": "Entrar no sistema",
+    "logoA11y": "Minha Estante — logotipo",
+    "resetEmailVazio": "Digite seu e-mail no campo acima antes de redefinir a senha.",
+    "resetSucesso": "E-mail de redefinição enviado! Confira sua caixa de entrada (e o spam).",
+    "resetErroInvalido": "Esse e-mail não parece válido. Confira e tente de novo.",
+    "resetErroMuitasTentativas": "Muitas tentativas seguidas. Aguarde um pouco antes de tentar novamente.",
+    "resetErroGenerico": "Não foi possível enviar o e-mail agora. Tente novamente em instantes."
+  },
+  "header": {
+    "buscarPlaceholder": "Buscar Usuários, Livros...",
+    "buscaA11yLabel": "Campo de busca",
+    "buscaA11yHint": "Digite para buscar usuários ou livros",
+    "sairConta": "Sair da conta",
+    "sairA11yHint": "Abre confirmação para encerrar a sessão",
+    "logoutMensagem": "Deseja encerrar sua sessão?",
+    "alternarModoEscuro": "Alternar modo escuro",
+    "admin": "Admin"
+  },
+  "dashboard": {
+    "titulo": "Gerenciamento de Usuários",
+    "usuariosNoSistema": "Usuários no Sistema",
+    "livrosCadastrados": "Livros Cadastrados",
+    "estantesSecretasAtivas": "Estantes Secretas Ativas"
+  },
+  "table": {
+    "listaUsuarios": "Lista de Usuários",
+    "exportarCsv": "Exportar CSV",
+    "exportarA11y": "Exportar lista de usuários em CSV",
+    "colUsuario": "Usuário",
+    "colStatus": "Status",
+    "colCadastro": "Cadastro",
+    "colLivros": "Livros",
+    "colEstantes": "Estantes Secretas",
+    "colAcoes": "Ações",
+    "ativo": "Ativo",
+    "inativo": "Inativo",
+    "verDetalhes": "Ver detalhes",
+    "verDetalhesA11y": "Ver detalhes de {{nome}}",
+    "nenhumUsuario": "Nenhum usuário encontrado.",
+    "nenhumRegistro": "Nenhum registro",
+    "registrosInfo": "{{inicio}} a {{fim}} de {{total}} registros",
+    "paginaAnteriorA11y": "Página anterior",
+    "proximaPaginaA11y": "Próxima página",
+    "pagina": "Página",
+    "de": "de"
+  },
+  "userDetails": {
+    "titulo": "Detalhes do Usuário",
+    "nome": "Nome",
+    "email": "E-mail",
+    "status": "Status",
+    "cadastro": "Cadastro",
+    "livrosCadastrados": "Livros cadastrados",
+    "estantesSecretas": "Estantes secretas",
+    "fecharA11y": "Fechar detalhes do usuário"
+  },
+  "confirmModal": {
+    "desativarComNome": "Deseja desativar \"{{nome}}\"?",
+    "desativarGenerico": "Deseja desativar esse usuário?"
+  }
+}

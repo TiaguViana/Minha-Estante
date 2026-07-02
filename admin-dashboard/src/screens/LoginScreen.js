@@ -1,6 +1,7 @@
 // Arquivo: src/screens/LoginScreen.js
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from "react-native";
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { typography, spacing } from '../styles/index';
@@ -8,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/UseAuth';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const { colors, darkMode } = useTheme();
   const { entrar, erro } = useAuth();
   const styles = getStyles(colors);
@@ -33,7 +35,7 @@ export default function LoginScreen() {
 
     if (!email) {
       setTipoMensagemReset('erro');
-      setMensagemReset('Digite seu e-mail no campo acima antes de redefinir a senha.');
+      setMensagemReset(t('login.resetEmailVazio'));
       return;
     }
 
@@ -41,15 +43,15 @@ export default function LoginScreen() {
     try {
       await sendPasswordResetEmail(auth, email);
       setTipoMensagemReset('sucesso');
-      setMensagemReset('E-mail de redefinição enviado! Confira sua caixa de entrada (e o spam).');
+      setMensagemReset(t('login.resetSucesso'));
     } catch (e) {
       setTipoMensagemReset('erro');
       if (e.code === 'auth/invalid-email') {
-        setMensagemReset('Esse e-mail não parece válido. Confira e tente de novo.');
+        setMensagemReset(t('login.resetErroInvalido'));
       } else if (e.code === 'auth/too-many-requests') {
-        setMensagemReset('Muitas tentativas seguidas. Aguarde um pouco antes de tentar novamente.');
+        setMensagemReset(t('login.resetErroMuitasTentativas'));
       } else {
-        setMensagemReset('Não foi possível enviar o e-mail agora. Tente novamente em instantes.');
+        setMensagemReset(t('login.resetErroGenerico'));
       }
     } finally {
       setEnviandoReset(false);
@@ -67,25 +69,25 @@ export default function LoginScreen() {
             : require('../../assets/logo/logoD.png')
         }
         accessible
-        accessibilityLabel="Minha Estante — logotipo"
+        accessibilityLabel={t('login.logoA11y')}
         accessibilityRole="image"
       />
 
       <View style={styles.card}>
 
-        <Text style={styles.textoLogin}>E-mail</Text>
+        <Text style={styles.textoLogin}>{t('login.emailLabel')}</Text>
         <View style={[styles.inputContainer, { marginBottom: spacing.md }]}>
           <TextInput
             style={styles.input}
-            placeholder="Insira seu E-mail"
+            placeholder={t('login.emailPlaceholder')}
             placeholderTextColor={colors.textFaded}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
             returnKeyType="next"
-            accessibilityLabel="Campo de e-mail"
-            accessibilityHint="Digite seu endereço de e-mail"
+            accessibilityLabel={t('login.emailA11yLabel')}
+            accessibilityHint={t('login.emailA11yHint')}
           />
           <Image
             source={require('../../assets/icons/Vector.png')}
@@ -94,11 +96,11 @@ export default function LoginScreen() {
           />
         </View>
 
-        <Text style={styles.textoLogin}>Senha</Text>
+        <Text style={styles.textoLogin}>{t('login.senhaLabel')}</Text>
         <View style={[styles.inputContainer, { marginBottom: spacing.sm }]}>
           <TextInput
             style={styles.input}
-            placeholder="Insira sua senha"
+            placeholder={t('login.senhaPlaceholder')}
             placeholderTextColor={colors.textFaded}
             value={password}
             onChangeText={setPassword}
@@ -106,16 +108,16 @@ export default function LoginScreen() {
             autoCapitalize="none"
             returnKeyType="go"
             onSubmitEditing={handleEntrar}
-            accessibilityLabel="Campo de senha"
-            accessibilityHint="Digite sua senha de acesso"
+            accessibilityLabel={t('login.senhaA11yLabel')}
+            accessibilityHint={t('login.senhaA11yHint')}
           />
           <TouchableOpacity
             onPress={() => setMostrarSenha((prev) => !prev)}
             activeOpacity={0.7}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             accessibilityRole="button"
-            accessibilityLabel={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
-            accessibilityHint="Alterna a visibilidade da senha digitada"
+            accessibilityLabel={mostrarSenha ? t('login.ocultarSenha') : t('login.mostrarSenha')}
+            accessibilityHint={t('login.alternarVisibilidadeSenha')}
           >
             <Image
               source={require('../../assets/icons/Icon.png')}
@@ -141,12 +143,12 @@ export default function LoginScreen() {
         <TouchableOpacity
           onPress={handleRedefinirSenha}
           disabled={enviandoReset}
-          accessibilityLabel={enviandoReset ? 'Enviando e-mail de redefinição' : 'Redefinir senha'}
+          accessibilityLabel={enviandoReset ? t('login.enviandoA11y') : t('login.redefinirSenhaA11y')}
           accessibilityRole="link"
           accessibilityState={{ disabled: enviandoReset }}
         >
           <Text style={[styles.esqueceuSenha, enviandoReset && styles.esqueceuSenhaDesabilitada]}>
-            {enviandoReset ? 'Enviando...' : 'Redefinir Senha'}
+            {enviandoReset ? t('login.enviando') : t('login.redefinirSenha')}
           </Text>
         </TouchableOpacity>
 
@@ -154,11 +156,11 @@ export default function LoginScreen() {
           style={[styles.botao, loading && styles.botaoDesabilitado]}
           onPress={handleEntrar}
           disabled={loading}
-          accessibilityLabel={loading ? 'Entrando, aguarde' : 'Entrar no sistema'}
+          accessibilityLabel={loading ? t('login.entrandoA11y') : t('login.entrarSistemaA11y')}
           accessibilityRole="button"
           accessibilityState={{ disabled: loading }}
         >
-          <Text style={styles.botaoText}>{loading ? 'Entrando...' : 'Entrar'}</Text>
+          <Text style={styles.botaoText}>{loading ? t('login.entrando') : t('login.entrar')}</Text>
         </TouchableOpacity>
 
       </View>

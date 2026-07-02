@@ -39,7 +39,7 @@ export function useDashboardData() {
   // Sem filtro de status, o total exibido é sempre o total real de usuários
   // (ou, durante busca, a quantidade de resultados encontrados). Como isso
   // é lido direto do state, não existe mais o risco de "congelar" um valor
-  // desatualizado (bug que tínhamos antes com a contagem filtrada).
+  // desatualizado (bug que tive antes com a contagem filtrada).
   const totalRegistros = buscando ? usuarios.length : totalUsuarios;
   const totalPages = buscando ? 1 : (Math.ceil(totalUsuarios / PAGE_SIZE) || 1);
 

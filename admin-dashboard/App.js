@@ -1,3 +1,4 @@
+import './src/i18n';
 import AppNavigator from "./src/navigation/AppNavigator";
 import { useFonts } from "expo-font";
 import { ThemeProvider } from "./src/context/ThemeContext";

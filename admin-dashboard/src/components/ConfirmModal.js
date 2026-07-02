@@ -1,20 +1,13 @@
 // Arquivo: src/components/ConfirmModal.js
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
-/**
- * Modal de confirmação reutilizável.
- *
- * @param {boolean} visible - controla se o modal está visível
- * @param {string} [mensagem] - texto principal do modal. Se não passar,
- *   usa o padrão de desativação de usuário com o userName.
- * @param {string} [userName] - nome do usuário (usado só quando mensagem não é passada)
- * @param {function} onConfirmar - chamada ao clicar em "Confirmar"
- * @param {function} onCancelar - chamada ao clicar em "Cancelar" ou no overlay
- */
 export default function ConfirmModal({ visible, mensagem, userName, onConfirmar, onCancelar }) {
+  const { t } = useTranslation();
+
   const textoDaMensagem = mensagem
-    || ('Deseja desativar ' + (userName ? '"' + userName + '"' : 'esse usuário') + '?');
+    || (userName ? t('confirmModal.desativarComNome', { nome: userName }) : t('confirmModal.desativarGenerico'));
 
   return (
     <Modal
@@ -36,18 +29,18 @@ export default function ConfirmModal({ visible, mensagem, userName, onConfirmar,
               onPress={onCancelar}
               style={styles.botaoCancelar}
               accessibilityRole="button"
-              accessibilityLabel="Cancelar"
+              accessibilityLabel={t('common.cancelar')}
             >
-              <Text style={styles.textoCancelar}>Cancelar</Text>
+              <Text style={styles.textoCancelar}>{t('common.cancelar')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={onConfirmar}
               style={styles.botaoConfirmar}
               accessibilityRole="button"
-              accessibilityLabel="Confirmar"
+              accessibilityLabel={t('common.confirmar')}
             >
-              <Text style={styles.textoConfirmar}>Confirmar</Text>
+              <Text style={styles.textoConfirmar}>{t('common.confirmar')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
