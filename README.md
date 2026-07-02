@@ -72,5 +72,3 @@ npm install
 ```bash
 npx expo start
 ```
-
-refaça esse readme 
