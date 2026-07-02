@@ -31,7 +31,7 @@
     <string name="erro_autenticar">Erro ao autenticar: %1$s</string>
     <string name="saudacao_ola">Olá, </string>
     <string name="usuario_carregando">Carregando…</string>
-    <string name="subtitulo_leituras">Como andam suas leituras?</string>
+    <string name="subtitulo_leituras">Como andam as suas leituras?</string>
     <string name="aba_meus_livros">Meus Livros</string>
     <string name="aba_estante_secreta">Estante Secreta</string>
     <string name="hint_buscar">Buscar</string>

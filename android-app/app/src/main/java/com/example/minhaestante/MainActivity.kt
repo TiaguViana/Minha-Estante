@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import com.example.minhaestante.ui.screens.MainScreen
 import com.example.minhaestante.ui.AppNavigation
+import com.example.minhaestante.ui.theme.TestePfvTheme // <-- IMPORTANTE: Import do seu tema
 import com.google.firebase.FirebaseApp
 
 class MainActivity : FragmentActivity() {
@@ -20,7 +21,7 @@ class MainActivity : FragmentActivity() {
         FirebaseApp.initializeApp(this)
 
         setContent {
-            MaterialTheme {
+            TestePfvTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
