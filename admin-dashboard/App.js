@@ -1,5 +1,6 @@
 import AppNavigator from "./src/navigation/AppNavigator";
 import { useFonts } from "expo-font";
+import { ThemeProvider } from "./src/context/ThemeContext";
 
 import {
   LibreBaskerville_400Regular,
@@ -23,5 +24,10 @@ export default function App() {
   if (!fontsLoaded) {
     return null; // aguarda carregar as fontes
   }
-  return <AppNavigator />;
+
+  return (
+    <ThemeProvider>
+      <AppNavigator />
+    </ThemeProvider>
+  );
 }
