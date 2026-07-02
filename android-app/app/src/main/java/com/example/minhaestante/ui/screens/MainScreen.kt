@@ -37,7 +37,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 
-// FUNÇÃO CRUCIAL: Extrai com segurança a FragmentActivity real do topo da pilha de Contextos
+
 private fun Context.findFragmentActivity(): FragmentActivity? {
     var currentContext = this
     while (currentContext is ContextWrapper) {
@@ -62,7 +62,6 @@ fun MainScreen() {
     val stringCarregando = stringResource(id = R.string.usuario_carregando)
     var nomeUsuario by remember { mutableStateOf(stringCarregando) }
 
-    // Sincroniza o usuário atual de forma reativa ao ciclo de vida da tela
     LaunchedEffect(auth.currentUser?.uid) {
         val uid = auth.currentUser?.uid
         if (uid != null) {
@@ -83,11 +82,6 @@ fun MainScreen() {
     val textSecondaryColor = if (isDark) DarkTextSecondary else LightTextSecondary
     val goldAccent = if (isDark) BuscaBordaDark else BuscaBordaLight
 
-    // Coleta a lista do Firebase de forma reativa a mudanças de autenticação
-    // IMPORTANTE: getBooks() precisa ser lembrado (remember). Sem isso, toda
-    // recomposição (ex: clicar no coração) cria um Flow/listener novo do Firestore,
-    // cancelando o anterior e gerando uma corrida entre o snapshot antigo e o novo —
-    // é isso que fazia o coração às vezes não refletir/persistir a mudança.
     val booksFlow = remember(auth.currentUser?.uid) { repository.getBooks() }
     val booksList by booksFlow.collectAsState(initial = emptyList())
 
@@ -98,7 +92,6 @@ fun MainScreen() {
 
     var dispararBiometria by remember { mutableStateOf(false) }
 
-    // CORREÇÃO DA BIOMETRIA: Invoca o Helper usando a FragmentActivity extraída com precisão
     LaunchedEffect(dispararBiometria) {
         if (dispararBiometria) {
             val activity = context.findFragmentActivity()
@@ -122,7 +115,6 @@ fun MainScreen() {
 
     val currentSection = if (selectedTab == 0) BookSection.MEUS_LIVROS else BookSection.ESTANTE_SECRETA
 
-    // CORREÇÃO DOS FAVORITOS: A filtragem escuta diretamente qualquer mutação na lista vinda do Firebase
     val filteredBooks = remember(booksList, selectedTab, searchQuery, filterOnlyFavorites) {
         booksList.filter { book ->
             val matchesTab = book.section == currentSection
@@ -154,9 +146,6 @@ fun MainScreen() {
 
     var showModal by remember { mutableStateOf(false) }
     var bookToEdit by remember { mutableStateOf<Book?>(null) }
-    // Capturamos a seção no exato instante do clique em "+", em vez de deixar o onSave
-    // depender de "currentSection" recalculado numa recomposição futura. Isso elimina
-    // qualquer possibilidade de o livro ser salvo na seção errada por causa de timing.
     var sectionParaNovoLivro by remember { mutableStateOf(currentSection) }
 
     Box(
@@ -172,7 +161,6 @@ fun MainScreen() {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // SAUDAÇÃO
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(id = R.string.saudacao_ola),
@@ -204,7 +192,6 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ABAS
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -253,7 +240,6 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // BUSCA E BOTÃO ADICIONAR
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -310,7 +296,6 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // FILTROS
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -363,7 +348,6 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // LISTA DE LIVROS
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -396,7 +380,6 @@ fun MainScreen() {
                                 repository.deleteBook(book.id)
                             },
                             onFavoriteClick = {
-                                // Envia a alteração diretamente para o repositório Firebase
                                 repository.saveBook(book.copy(isFavorite = !book.isFavorite))
                             }
                         )

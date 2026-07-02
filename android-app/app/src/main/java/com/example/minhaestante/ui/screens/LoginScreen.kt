@@ -201,16 +201,15 @@ fun LoginScreen(
                         }
 
                         if (!vazioEmail && erroSenha == null) {
-                            isLoading = true // Inicia o carregamento
+                            isLoading = true
 
-                            // Usando a função do FirebaseRepo
                             firebaseRepo.loginUsuario(
                                 email = email,
                                 senha = senha,
                                 onSuccess = {
                                     isLoading = false
                                     Toast.makeText(context, textoSucessoLogin, Toast.LENGTH_SHORT).show()
-                                    onLoginSuccess() // Vai para a MainScreen
+                                    onLoginSuccess()
                                 },
                                 onFailure = { erro ->
                                     isLoading = false
@@ -221,7 +220,7 @@ fun LoginScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    enabled = !isLoading, // Desativa se estiver carregando
+                    enabled = !isLoading,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     if (isLoading) {
