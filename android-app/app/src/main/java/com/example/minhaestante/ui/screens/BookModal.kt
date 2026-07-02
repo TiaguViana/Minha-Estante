@@ -136,6 +136,7 @@ fun BookModal(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
 
+            // CAMPO BUSCA API
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -221,6 +222,7 @@ fun BookModal(
                     modifier = Modifier.fillMaxWidth().height(50.dp)
                 )
 
+                // RESULTADOS DA API
                 if (apiResults.isNotEmpty()) {
                     Card(
                         modifier = Modifier
@@ -283,6 +285,7 @@ fun BookModal(
                 }
             }
 
+            // FORMULÁRIO LOCAL
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
@@ -311,7 +314,8 @@ fun BookModal(
                 maxLines = 3
             )
 
-            val labelStatusAcessivel = stringResource(id = R.string.desc_status_leitura, status.label)
+            // DROPDOWN STATUS DE LEITURA
+            val labelStatusAcessivel = stringResource(id = R.string.desc_status_leitura, stringResource(id = status.labelResId))
             Box {
                 Box(
                     modifier = Modifier
@@ -323,7 +327,7 @@ fun BookModal(
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(text = status.label, color = LightTextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp, fontFamily = AtkinsonHyperlegible)
+                        Text(text = stringResource(id = status.labelResId), color = LightTextPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp, fontFamily = AtkinsonHyperlegible)
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, tint = LightTextPrimary, modifier = Modifier.size(18.dp))
                     }
                 }
@@ -335,7 +339,7 @@ fun BookModal(
                 ) {
                     ReadingStatus.entries.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(text = option.label, color = textPrimaryColor, fontFamily = AtkinsonHyperlegible, fontWeight = FontWeight.Medium) },
+                            text = { Text(text = stringResource(id = option.labelResId), color = textPrimaryColor, fontFamily = AtkinsonHyperlegible, fontWeight = FontWeight.Medium) },
                             onClick = {
                                 status = option
                                 dropdownExpanded = false
@@ -345,6 +349,7 @@ fun BookModal(
                 }
             }
 
+            // AVALIAÇÃO DE ESTRELAS ACESSÍVEL
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.semantics { }
@@ -365,6 +370,7 @@ fun BookModal(
                 }
             }
 
+            // SELETOR DE DATA
             Column {
                 Text(text = stringResource(id = R.string.label_data_leitura), fontSize = 14.sp, fontFamily = AtkinsonHyperlegible, color = textPrimaryColor, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(4.dp))
@@ -394,6 +400,7 @@ fun BookModal(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // BOTÕES DE AÇÃO DO RODAPÉ
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -430,6 +437,7 @@ fun BookModal(
     }
 }
 
+// 👈 Data Class corrigida (removido o parâmetro redundante/conflitante 'description')
 data class ApiBookResult(
     val titulo: String,
     val autor: String,

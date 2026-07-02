@@ -57,13 +57,25 @@ fun CadastroScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
         // BOTÃO VOLTAR
-        Row(modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onNavigateBack) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            FilledIconButton(
+                onClick = onNavigateBack,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = if (darkTheme) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface
+                ),
+                modifier = Modifier.size(48.dp)
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(id = R.string.desc_botao_voltar),
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(24.dp) //
                 )
             }
         }
@@ -76,6 +88,7 @@ fun CadastroScreen(
             modifier = Modifier.size(165.dp)
         )
 
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Card(
@@ -84,7 +97,7 @@ fun CadastroScreen(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.background
             ),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface)
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary)
         ) {
             Column(modifier = Modifier.padding(24.dp, 32.dp)) {
 
@@ -94,7 +107,7 @@ fun CadastroScreen(
                     fontFamily = Baskervville,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -105,14 +118,25 @@ fun CadastroScreen(
                         .fillMaxWidth()
                         .testTag("campoUsuario"),
                     shape = RoundedCornerShape(16.dp),
-                    trailingIcon = { Icon(Icons.Default.Person, null, modifier = Modifier.size(16.dp)) },
+                    trailingIcon = {
+                        Icon(
+                            Icons.Default.Person,
+                            null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.outline
+                        )
+                    },
                     label = { Text(stringResource(id = R.string.hint_usuario)) },
                     supportingText = { if (vazioUsuario) Text(stringResource(id = R.string.erro_obrigatorio)) },
                     isError = vazioUsuario,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        cursorColor = MaterialTheme.colorScheme.onBackground
+                        focusedTextColor = MaterialTheme.colorScheme.outline,
+                        unfocusedTextColor = MaterialTheme.colorScheme.outline,
+                        focusedBorderColor = MaterialTheme.colorScheme.outline,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.outline,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.outline
                     )
                 )
 
@@ -124,7 +148,7 @@ fun CadastroScreen(
                     fontFamily = Baskervville,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -135,14 +159,25 @@ fun CadastroScreen(
                         .fillMaxWidth()
                         .testTag("campoEmail"),
                     shape = RoundedCornerShape(16.dp),
-                    trailingIcon = { Icon(Icons.Default.Email, null, modifier = Modifier.size(16.dp)) },
+                    trailingIcon = {
+                        Icon(
+                            Icons.Default.Email,
+                            null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.outline
+                        )
+                    },
                     label = { Text(stringResource(id = R.string.hint_email_cadastro)) },
                     supportingText = { if (vazioEmail) Text(stringResource(id = R.string.erro_obrigatorio)) },
                     isError = vazioEmail,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        cursorColor = MaterialTheme.colorScheme.onBackground
+                        focusedTextColor = MaterialTheme.colorScheme.outline,
+                        unfocusedTextColor = MaterialTheme.colorScheme.outline,
+                        focusedBorderColor = MaterialTheme.colorScheme.outline,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.outline,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.outline
                     )
                 )
 
@@ -154,7 +189,7 @@ fun CadastroScreen(
                     fontFamily = Baskervville,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
@@ -168,6 +203,7 @@ fun CadastroScreen(
                     label = { Text(stringResource(id = R.string.hint_escolha_senha)) },
                     supportingText = { erroSenha?.let { Text(it) } },
                     isError = erroSenha != null,
+                    // Aplicando a cor outline no ícone de olho (IconButton)
                     trailingIcon = {
                         IconButton(onClick = { vizivelSenha = !vizivelSenha }) {
                             Icon(
@@ -175,14 +211,20 @@ fun CadastroScreen(
                                 contentDescription = stringResource(
                                     id = if (vizivelSenha) R.string.desc_ocultar_senha else R.string.desc_mostrar_senha
                                 ),
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.outline
                             )
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        cursorColor = MaterialTheme.colorScheme.onBackground
+                        // Modificações de cor solicitadas:
+                        focusedTextColor = MaterialTheme.colorScheme.outline,
+                        unfocusedTextColor = MaterialTheme.colorScheme.outline,
+                        focusedBorderColor = MaterialTheme.colorScheme.outline,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.outline,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.outline
                     )
                 )
 
@@ -220,17 +262,17 @@ fun CadastroScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     enabled = !isLoading,
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.primary)
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onSurface)
                     } else {
                         Text(
                             text = "Cadastrar",
                             fontFamily = Baskervville,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+                            color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }

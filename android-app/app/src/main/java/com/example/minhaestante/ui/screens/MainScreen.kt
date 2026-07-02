@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -51,7 +52,9 @@ private fun Context.findFragmentActivity(): FragmentActivity? {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onLogout: () -> Unit
+) {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
 
@@ -161,27 +164,57 @@ fun MainScreen() {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(id = R.string.saudacao_ola),
-                    fontSize = 28.sp,
-                    fontFamily = Baskervville,
-                    color = textPrimaryColor
-                )
-                Box(
-                    modifier = Modifier
-                        .background(CorDestaque, RoundedCornerShape(2.dp))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = nomeUsuario,
+                        text = stringResource(id = R.string.saudacao_ola),
                         fontSize = 28.sp,
                         fontFamily = Baskervville,
-                        fontWeight = FontWeight.Bold,
-                        color = LightTextPrimary
+                        color = textPrimaryColor
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .background(CorDestaque, RoundedCornerShape(2.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = nomeUsuario,
+                            fontSize = 28.sp,
+                            fontFamily = Baskervville,
+                            fontWeight = FontWeight.Bold,
+                            color = LightTextPrimary
+                        )
+                    }
+                }
+
+
+
+                FilledIconButton(
+                    onClick = {
+                        auth.signOut()
+                        onLogout()
+                    },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = if (isDark) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface
+                    ),
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = "Fazer Logout",
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
+
             Text(
                 text = stringResource(id = R.string.subtitulo_leituras),
                 fontSize = 16.sp,

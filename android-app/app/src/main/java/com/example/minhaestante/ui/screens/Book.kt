@@ -1,12 +1,15 @@
 package com.example.minhaestante.ui.screens
 
+import androidx.annotation.StringRes
+import com.example.minhaestante.R
 import com.google.firebase.firestore.PropertyName
 import java.util.Date
 import java.util.UUID
 
-enum class ReadingStatus(val label: String) {
-    CONCLUIDO("Concluído"),
-    EM_ANDAMENTO("Em Andamento")
+
+enum class ReadingStatus(@StringRes val labelResId: Int) {
+    CONCLUIDO(R.string.status_concluido),
+    EM_ANDAMENTO(R.string.status_andamento)
 }
 
 enum class BookSection {

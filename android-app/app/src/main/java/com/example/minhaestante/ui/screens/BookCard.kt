@@ -73,8 +73,13 @@ fun BookCard(
     val textPrimaryColor = if (isDark) DarkTextPrimary else LightTextPrimary
     val textSecondaryColor = if (isDark) DarkTextSecondary else LightTextSecondary
     val goldAccent = if (isDark) BuscaBordaDark else BuscaBordaLight
+
     val dateFormat = remember { SimpleDateFormat("dd/MM", Locale.getDefault()) }
+
+    // Isolamento do estado do favorito para forçar a re-recomposição imediata do ícone
     val isFavoriteState = remember(book.isFavorite) { book.isFavorite }
+
+    // Tratamento de strings fallback para evitar quebras visuais e falhas de tradução
     val tituloTratado = book.title.ifEmpty { stringResource(id = R.string.label_sem_titulo) }
     val autorTratado = book.author.ifEmpty { stringResource(id = R.string.label_autor_desconhecido) }
     val descricaoTratada = book.description.ifEmpty { stringResource(id = R.string.label_sem_descricao) }
@@ -157,6 +162,7 @@ fun BookCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                // Linha Superior: Agrupamento de Ações Rápidas com Semântica de Acessibilidade Correta
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -242,13 +248,15 @@ fun BookCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                // Indicador de Status com Semântica Unificada para Leitores de Tela
                 val descStatusEspeficico = when (book.readingStatus) {
                     ReadingStatus.CONCLUIDO -> stringResource(id = R.string.desc_livro_status_concluido)
                     ReadingStatus.EM_ANDAMENTO -> stringResource(id = R.string.desc_livro_status_andamento)
                 }
+                val statusLabel = stringResource(id = book.readingStatus.labelResId)
                 Row(
                     modifier = Modifier.semantics(mergeDescendants = true) {
-                        contentDescription = "$descStatusEspeficico: ${book.readingStatus.label}"
+                        contentDescription = "$descStatusEspeficico: $statusLabel"
                     },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -264,7 +272,7 @@ fun BookCard(
                             .background(circleColor)
                     )
                     Text(
-                        text = book.readingStatus.label,
+                        text = statusLabel,
                         fontFamily = AtkinsonHyperlegible,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
@@ -272,6 +280,7 @@ fun BookCard(
                     )
                 }
 
+                // Rodapé: Avaliação em Estrelas (Limpa e Acessível) + Ação de Editar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

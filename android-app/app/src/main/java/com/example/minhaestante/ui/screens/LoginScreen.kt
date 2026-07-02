@@ -99,14 +99,14 @@ fun LoginScreen(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.background
             ),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface)
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary)
         ) {
             Column(modifier = Modifier.padding(24.dp, 32.dp)) {
 
                 // EMAIL
                 Text(
                     text = stringResource(id = R.string.label_email),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontFamily = Baskervville,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -123,16 +123,21 @@ fun LoginScreen(
                         Icon(
                             Icons.Default.Email,
                             contentDescription = stringResource(id = R.string.desc_icone_email),
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.outline // Ícone com a cor outline
                         )
                     },
                     label = { Text(stringResource(id = R.string.hint_email)) },
                     supportingText = { if (vazioEmail) Text(stringResource(id = R.string.erro_obrigatorio)) },
                     isError = vazioEmail,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        cursorColor = MaterialTheme.colorScheme.onBackground
+                        focusedTextColor = MaterialTheme.colorScheme.outline,
+                        unfocusedTextColor = MaterialTheme.colorScheme.outline,
+                        focusedBorderColor = MaterialTheme.colorScheme.outline,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.outline,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.outline
                     )
                 )
 
@@ -141,7 +146,7 @@ fun LoginScreen(
                 // SENHA
                 Text(
                     text = stringResource(id = R.string.label_senha),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 16.sp,
                     fontFamily = Baskervville,
                     fontWeight = FontWeight.Bold
@@ -165,14 +170,19 @@ fun LoginScreen(
                                 contentDescription = stringResource(
                                     id = if (senhaVizivel) R.string.desc_ocultar_senha else R.string.desc_mostrar_senha
                                 ),
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.outline // Ícone do olho com a cor outline
                             )
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        cursorColor = MaterialTheme.colorScheme.onBackground
+                        focusedTextColor = MaterialTheme.colorScheme.outline,
+                        unfocusedTextColor = MaterialTheme.colorScheme.outline,
+                        focusedBorderColor = MaterialTheme.colorScheme.outline,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.outline,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.outline
                     )
                 )
 
@@ -221,14 +231,14 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     enabled = !isLoading,
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.primary)
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onBackground)
                     } else {
                         Text(
                             text = stringResource(id = R.string.btn_entrar),
-                            color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary,
+                            color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface,
                             fontSize = 18.sp,
                             fontFamily = Baskervville,
                             fontWeight = FontWeight.Bold

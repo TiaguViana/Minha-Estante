@@ -18,13 +18,11 @@ sealed class Screen(val route: String) {
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    // O app agora começa na tela de Splash!
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
 
         // 1. Tela de Splash
         composable(Screen.Splash.route) {
             SplashScreen(onTimeout = {
-                // Após os 3 segundos da Splash, vai para o Login de forma limpa
                 navController.navigate(Screen.Login.route) {
                     popUpTo(Screen.Splash.route) { inclusive = true }
                 }
@@ -35,29 +33,24 @@ fun AppNavigation() {
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    // Ao logar, vai para a MainScreen e limpa o Login do histórico
                     navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
                 onNavigateToCadastro = {
-                    // Quando clicar em "Crie Agora!", navega para a tela de Cadastro
                     navController.navigate(Screen.Cadastro.route)
                 }
             )
         }
 
-        // 3. Tela de Cadastro (CORRIGIDO ADICIONANDO O RETORNO)
         composable(Screen.Cadastro.route) {
             CadastroScreen(
                 onCadastroSuccess = {
-                    // Após se cadastrar com sucesso, volta para a tela de login
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Cadastro.route) { inclusive = true }
                     }
                 },
                 onNavigateBack = {
-                    // Executado quando clicar na seta de voltar da barra superior do Cadastro
                     navController.popBackStack()
                 }
             )
@@ -67,9 +60,16 @@ fun AppNavigation() {
         composable(Screen.Main.route) {
             val currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
-            // O 'key' força a MainScreen a resetar o estado interno caso o UID mude (logout/login)
+
             key(currentUid) {
-                MainScreen()
+                MainScreen(
+                    onLogout = {
+
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Main.route) { inclusive = true }
+                        }
+                    }
+                )
             }
         }
     }
