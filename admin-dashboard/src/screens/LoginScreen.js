@@ -1,6 +1,8 @@
 // Arquivo: src/screens/LoginScreen.js
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Image } from "react-native";
 import React, { useState } from 'react';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../services/firebaseConfig';
 import { typography, spacing } from '../styles/index';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/UseAuth';
@@ -13,16 +15,45 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [mostrarSenha, setMostrarSenha] = useState(false); // NOVO
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+
+  const [enviandoReset, setEnviandoReset] = useState(false);
+  const [mensagemReset, setMensagemReset] = useState('');
+  const [tipoMensagemReset, setTipoMensagemReset] = useState('');
 
   async function handleEntrar() {
     if (!email || !password) return;
     setLoading(true);
     await entrar(email, password);
-    // Se o login der certo, o onAuthStateChanged no AppNavigator detecta
-    // o novo usuário e redireciona pra Dashboard automaticamente.
-    // Se der errado, o erro já fica disponível via useAuth e aparece na tela.
     setLoading(false);
+  }
+
+  async function handleRedefinirSenha() {
+    setMensagemReset('');
+
+    if (!email) {
+      setTipoMensagemReset('erro');
+      setMensagemReset('Digite seu e-mail no campo acima antes de redefinir a senha.');
+      return;
+    }
+
+    setEnviandoReset(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setTipoMensagemReset('sucesso');
+      setMensagemReset('E-mail de redefinição enviado! Confira sua caixa de entrada (e o spam).');
+    } catch (e) {
+      setTipoMensagemReset('erro');
+      if (e.code === 'auth/invalid-email') {
+        setMensagemReset('Esse e-mail não parece válido. Confira e tente de novo.');
+      } else if (e.code === 'auth/too-many-requests') {
+        setMensagemReset('Muitas tentativas seguidas. Aguarde um pouco antes de tentar novamente.');
+      } else {
+        setMensagemReset('Não foi possível enviar o e-mail agora. Tente novamente em instantes.');
+      }
+    } finally {
+      setEnviandoReset(false);
+    }
   }
 
   return (
@@ -52,6 +83,7 @@ export default function LoginScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            returnKeyType="next"
             accessibilityLabel="Campo de e-mail"
             accessibilityHint="Digite seu endereço de e-mail"
           />
@@ -72,6 +104,8 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             secureTextEntry={!mostrarSenha}
             autoCapitalize="none"
+            returnKeyType="go"
+            onSubmitEditing={handleEntrar}
             accessibilityLabel="Campo de senha"
             accessibilityHint="Digite sua senha de acesso"
           />
@@ -91,16 +125,29 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Mensagem de erro do Firebase*/}
         {erro ? (
           <Text style={styles.erroText} accessibilityRole="alert">{erro}</Text>
         ) : null}
 
+        {mensagemReset ? (
+          <Text
+            style={tipoMensagemReset === 'sucesso' ? styles.resetSucessoText : styles.erroText}
+            accessibilityRole="alert"
+          >
+            {mensagemReset}
+          </Text>
+        ) : null}
+
         <TouchableOpacity
-          accessibilityLabel="Redefinir senha"
+          onPress={handleRedefinirSenha}
+          disabled={enviandoReset}
+          accessibilityLabel={enviandoReset ? 'Enviando e-mail de redefinição' : 'Redefinir senha'}
           accessibilityRole="link"
+          accessibilityState={{ disabled: enviandoReset }}
         >
-          <Text style={styles.esqueceuSenha}>Redefinir Senha</Text>
+          <Text style={[styles.esqueceuSenha, enviandoReset && styles.esqueceuSenhaDesabilitada]}>
+            {enviandoReset ? 'Enviando...' : 'Redefinir Senha'}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -184,8 +231,16 @@ function getStyles(colors) {
       color: colors.textFadedStroke,
       ...typography.redefinir,
     },
+    esqueceuSenhaDesabilitada: {
+      opacity: 0.5,
+    },
     erroText: {
       color: '#C0392B',
+      marginBottom: spacing.sm,
+      fontSize: 14,
+    },
+    resetSucessoText: {
+      color: '#2E7D32',
       marginBottom: spacing.sm,
       fontSize: 14,
     },

@@ -1,14 +1,8 @@
 // Arquivo: src/components/UserTable.js
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import ConfirmModal from './ConfirmModal';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import UserDetailsModal from './UserDetailsModal';
 import { useTheme } from '../context/ThemeContext';
-
-const OPCOES_STATUS = [
-  { valor: null, label: 'Todos' },
-  { valor: 'ativo', label: 'Ativos' },
-  { valor: 'inativo', label: 'Inativos' },
-];
 
 export default function UserTable({
   data = [],
@@ -17,40 +11,19 @@ export default function UserTable({
   totalRegistros = 0,
   pageSize = 10,
   onPageChange,
-  onDesativar,
-  onReativar,
-  trashIcon,
-  statusFiltro,
-  onStatusFiltroChange,
   ordenacao,
   onOrdenar,
   ordenacaoDesabilitada = false,
+  onExportarCSV,
+  exportando = false,
 }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
 
-  const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
-
-  function abrirModal(usuario) {
-    setUsuarioSelecionado(usuario);
-  }
-
-  function fecharModal() {
-    setUsuarioSelecionado(null);
-  }
-
-  function confirmarAcao() {
-    if (!usuarioSelecionado) return;
-    const isAtivo = usuarioSelecionado.status === 'ativo';
-    if (isAtivo && onDesativar) onDesativar(usuarioSelecionado.id);
-    if (!isAtivo && onReativar) onReativar(usuarioSelecionado.id);
-    fecharModal();
-  }
+  const [usuarioDetalhes, setUsuarioDetalhes] = useState(null);
 
   const inicioRegistro = totalRegistros > 0 ? (currentPage - 1) * pageSize + 1 : 0;
   const fimRegistro = Math.min(currentPage * pageSize, totalRegistros);
-  const nomeUsuarioSelecionado = usuarioSelecionado ? usuarioSelecionado.name : '';
-  const acaoEhDesativar = usuarioSelecionado?.status === 'ativo';
 
   function IconeOrdenacao({ campo }) {
     if (!ordenacao || ordenacao.campo !== campo) return null;
@@ -63,31 +36,19 @@ export default function UserTable({
       <View style={styles.tituloRow}>
         <Text style={styles.titulo}>Lista de Usuários</Text>
 
-        {/* Filtro de status */}
-        <View style={styles.filtroStatusGrupo}>
-          {OPCOES_STATUS.map((opcao) => (
-            <TouchableOpacity
-              key={opcao.label}
-              style={[
-                styles.filtroStatusBotao,
-                statusFiltro === opcao.valor && styles.filtroStatusBotaoAtivo,
-              ]}
-              onPress={() => onStatusFiltroChange && onStatusFiltroChange(opcao.valor)}
-              accessibilityRole="button"
-              accessibilityLabel={`Filtrar por ${opcao.label}`}
-              accessibilityState={{ selected: statusFiltro === opcao.valor }}
-            >
-              <Text
-                style={[
-                  styles.filtroStatusTexto,
-                  statusFiltro === opcao.valor && styles.filtroStatusTextoAtivo,
-                ]}
-              >
-                {opcao.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <TouchableOpacity
+          style={[styles.exportarBotao, exportando && styles.exportarBotaoDesabilitado]}
+          onPress={onExportarCSV}
+          disabled={exportando}
+          accessibilityRole="button"
+          accessibilityLabel="Exportar lista de usuários em CSV"
+        >
+          {exportando ? (
+            <ActivityIndicator size="small" color={colors.tableHeaderText} />
+          ) : (
+            <Text style={styles.exportarTexto}>⬇ Exportar CSV</Text>
+          )}
+        </TouchableOpacity>
       </View>
 
       <View style={styles.headerRow}>
@@ -147,19 +108,12 @@ export default function UserTable({
 
               <View style={[styles.dataCell, styles.colAcoes]}>
                 <TouchableOpacity
-                  onPress={function () { abrirModal(usuario); }}
-                  style={styles.acaoButton}
-                  accessibilityLabel={isAtivo ? 'Desativar ' + usuario.name : 'Reativar ' + usuario.name}
+                  onPress={function () { setUsuarioDetalhes(usuario); }}
+                  style={styles.detalhesButton}
+                  accessibilityLabel={'Ver detalhes de ' + usuario.name}
+                  accessibilityRole="button"
                 >
-                  {isAtivo ? (
-                    trashIcon ? (
-                      <Image source={trashIcon} style={styles.trashIcon} resizeMode="contain" />
-                    ) : (
-                      <Text style={styles.trashEmoji}>🗑️</Text>
-                    )
-                  ) : (
-                    <Text style={styles.reativarTexto}>↩️ Reativar</Text>
-                  )}
+                  <Text style={styles.detalhesTexto}>👁 Ver detalhes</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -167,7 +121,6 @@ export default function UserTable({
         })
       )}
 
-      {/* Paginação —  */}
       <View style={styles.paginacaoRow}>
         <Text style={styles.paginacaoInfo}>
           {totalRegistros > 0
@@ -213,12 +166,10 @@ export default function UserTable({
         </View>
       </View>
 
-      <ConfirmModal
-        visible={usuarioSelecionado !== null}
-        userName={nomeUsuarioSelecionado}
-        mensagem={acaoEhDesativar ? undefined : `Deseja reativar ${nomeUsuarioSelecionado}?`}
-        onConfirmar={confirmarAcao}
-        onCancelar={fecharModal}
+      <UserDetailsModal
+        visible={usuarioDetalhes !== null}
+        usuario={usuarioDetalhes}
+        onFechar={() => setUsuarioDetalhes(null)}
       />
     </View>
   );
@@ -245,26 +196,22 @@ function getStyles(colors) {
       color: colors.tableHeaderText,
       fontWeight: '500',
     },
-    filtroStatusGrupo: {
-      flexDirection: 'row',
-      gap: 8,
-    },
-    filtroStatusBotao: {
-      paddingVertical: 4,
-      paddingHorizontal: 12,
-      borderRadius: 16,
+    exportarBotao: {
+      paddingVertical: 6,
+      paddingHorizontal: 14,
+      borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.tableHeaderText,
+      minWidth: 130,
+      alignItems: 'center',
     },
-    filtroStatusBotaoAtivo: {
-      backgroundColor: colors.tableHeaderText,
+    exportarBotaoDesabilitado: {
+      opacity: 0.6,
     },
-    filtroStatusTexto: {
+    exportarTexto: {
       fontSize: 13,
       color: colors.tableHeaderText,
-    },
-    filtroStatusTextoAtivo: {
-      color: colors.tableCardBg,
+      fontWeight: '600',
     },
     headerRow: {
       flexDirection: 'row',
@@ -318,29 +265,20 @@ function getStyles(colors) {
       fontSize: 13,
       color: colors.tableRowText,
     },
-    acaoButton: {
+    detalhesButton: {
       padding: 4,
     },
-    trashIcon: {
-      width: 18,
-      height: 18,
-      tintColor: '#6B8C98',
-    },
-    trashEmoji: {
-      fontSize: 16,
-    },
-    reativarTexto: {
+    detalhesTexto: {
       fontSize: 12,
       fontWeight: '600',
-      color: colors.tableDotAtivo,
+      color: colors.tableHeaderText,
     },
     colUsuario: { flex: 2.5 },
     colStatus: { flex: 1.5 },
     colCadastro: { flex: 1.5 },
     colLivros: { flex: 1 },
     colEstantes: { flex: 2 },
-    colAcoes: { flex: 1, alignItems: 'center' },
-
+    colAcoes: { flex: 1.4, alignItems: 'center' },
     paginacaoRow: {
       flexDirection: 'row',
       alignItems: 'center',

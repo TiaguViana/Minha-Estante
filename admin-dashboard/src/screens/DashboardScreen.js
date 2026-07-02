@@ -17,22 +17,21 @@ export default function DashboardScreen() {
     totalUsuarios,
     totalLivros,
     totalEstantesSecretas,
-    totalRegistrosTabela,
+    totalRegistros,
     currentPage,
     totalPages,
     loading,
     erro,
     proximaPagina,
     paginaAnterior,
-    desativarUsuario,
-    reativarUsuario,
     termoBusca,
     setTermoBusca,
-    statusFiltro,
-    setStatusFiltro,
     ordenacao,
     alternarOrdenacao,
     buscando,
+    exportarCSV,
+    exportando,
+    erroExport,
   } = useDashboardData();
 
   function handlePageChange(novaPagina) {
@@ -72,9 +71,8 @@ export default function DashboardScreen() {
           />
         </View>
 
-        {erro ? (
-          <Text style={styles.erroText}>{erro}</Text>
-        ) : null}
+        {erro ? <Text style={styles.erroText}>{erro}</Text> : null}
+        {erroExport ? <Text style={styles.erroText}>{erroExport}</Text> : null}
 
         {loading && usuarios.length === 0 ? (
           <View style={styles.loadingContainer}>
@@ -85,17 +83,14 @@ export default function DashboardScreen() {
             data={usuarios}
             currentPage={currentPage}
             totalPages={totalPages}
-            totalRegistros={totalRegistrosTabela}
+            totalRegistros={totalRegistros}
             pageSize={10}
             onPageChange={handlePageChange}
-            onDesativar={desativarUsuario}
-            onReativar={reativarUsuario}
-            trashIcon={require('../../assets/icons/trash.png')}
-            statusFiltro={statusFiltro}
-            onStatusFiltroChange={setStatusFiltro}
             ordenacao={ordenacao}
             onOrdenar={alternarOrdenacao}
             ordenacaoDesabilitada={buscando}
+            onExportarCSV={exportarCSV}
+            exportando={exportando}
           />
         )}
       </View>

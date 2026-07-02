@@ -4,8 +4,6 @@ import {
   collection,
   collectionGroup,
   getDocs,
-  doc,
-  updateDoc,
   query,
   orderBy,
   limit,
@@ -25,19 +23,25 @@ export function useDashboardData() {
   const [totalLivros, setTotalLivros] = useState(0);
   const [totalEstantesSecretas, setTotalEstantesSecretas] = useState(0);
 
-  const [totalRegistrosTabela, setTotalRegistrosTabela] = useState(0);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [cursores, setCursores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
 
   const [termoBusca, setTermoBusca] = useState('');
-  const [statusFiltro, setStatusFiltro] = useState(null);
   const [ordenacao, setOrdenacao] = useState({ campo: 'cadastro', direcao: 'desc' });
 
+  const [exportando, setExportando] = useState(false);
+  const [erroExport, setErroExport] = useState('');
+
   const buscando = termoBusca.trim().length > 0;
-  const totalPages = buscando ? 1 : (Math.ceil(totalRegistrosTabela / PAGE_SIZE) || 1);
+
+  // Sem filtro de status, o total exibido é sempre o total real de usuários
+  // (ou, durante busca, a quantidade de resultados encontrados). Como isso
+  // é lido direto do state, não existe mais o risco de "congelar" um valor
+  // desatualizado (bug que tínhamos antes com a contagem filtrada).
+  const totalRegistros = buscando ? usuarios.length : totalUsuarios;
+  const totalPages = buscando ? 1 : (Math.ceil(totalUsuarios / PAGE_SIZE) || 1);
 
   useEffect(() => {
     buscarMetricas();
@@ -47,8 +51,7 @@ export function useDashboardData() {
     setCurrentPage(1);
     setCursores([]);
     buscarPagina(1);
-    if (!buscando) buscarContagemFiltrada();
-  }, [termoBusca, statusFiltro, ordenacao]);
+  }, [termoBusca, ordenacao]);
 
   useEffect(() => {
     if (!buscando) buscarPagina(currentPage);
@@ -71,19 +74,6 @@ export function useDashboardData() {
     }
   }
 
-  // CORRIGIDO: consulta a contagem real no Firestore, em vez de depender
-  // do estado `totalUsuarios` (que pode ainda não ter chegado quando esta
-  // função roda, causando o bug do "Nenhum registro" incorreto).
-  async function buscarContagemFiltrada() {
-    try {
-      const clausulas = statusFiltro ? [where('status', '==', statusFiltro)] : [];
-      const snap = await getCountFromServer(query(collection(db, 'usuarios'), ...clausulas));
-      setTotalRegistrosTabela(snap.data().count);
-    } catch (e) {
-      console.warn('Erro ao contar usuários filtrados:', e);
-    }
-  }
-
   async function buscarPagina(pagina) {
     setLoading(true);
     setErro('');
@@ -91,6 +81,9 @@ export function useDashboardData() {
       const termo = termoBusca.trim();
       const emBusca = termo.length > 0;
 
+      // Regra do Firestore: filtro de intervalo (busca por prefixo) exige
+      // que o orderBy comece pelo mesmo campo — então durante a busca a
+      // ordenação fica travada em 'nome'.
       const campoOrdenacao = emBusca ? 'nome' : ordenacao.campo;
       const direcaoOrdenacao = emBusca ? 'asc' : ordenacao.direcao;
 
@@ -99,10 +92,6 @@ export function useDashboardData() {
       if (emBusca) {
         clausulas.push(where('nome', '>=', termo));
         clausulas.push(where('nome', '<=', termo + '\uf8ff'));
-      }
-
-      if (statusFiltro) {
-        clausulas.push(where('status', '==', statusFiltro));
       }
 
       clausulas.push(orderBy(campoOrdenacao, direcaoOrdenacao));
@@ -143,6 +132,7 @@ export function useDashboardData() {
         return {
           id: d.id,
           name: data.nome || data.email || 'Sem nome',
+          email: data.email || '',
           status: data.status || 'ativo',
           cadastro: formatarData(data.cadastro),
           livros: String(snapLivros.data().count),
@@ -151,38 +141,11 @@ export function useDashboardData() {
       }));
 
       setUsuarios(lista);
-
-
-      if (emBusca) {
-        setTotalRegistrosTabela(lista.length);
-      }
     } catch (e) {
       console.warn('Erro ao buscar usuários:', e);
       setErro('Não foi possível carregar os usuários.');
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function desativarUsuario(id) {
-    try {
-      await updateDoc(doc(db, 'usuarios', id), { status: 'inativo' });
-      setUsuarios(prev =>
-        prev.map(u => u.id === id ? { ...u, status: 'inativo' } : u)
-      );
-    } catch (e) {
-      console.warn('Erro ao desativar usuário:', e);
-    }
-  }
-
-  async function reativarUsuario(id) {
-    try {
-      await updateDoc(doc(db, 'usuarios', id), { status: 'ativo' });
-      setUsuarios(prev =>
-        prev.map(u => u.id === id ? { ...u, status: 'ativo' } : u)
-      );
-    } catch (e) {
-      console.warn('Erro ao reativar usuário:', e);
     }
   }
 
@@ -202,27 +165,55 @@ export function useDashboardData() {
     if (currentPage > 1) setCurrentPage(p => p - 1);
   }
 
+  // Exporta TODOS os usuários (não só a página atual) como CSV.
+  // Só campos básicos, sem contagem de livros por usuário, pra manter
+  // rápido mesmo com muitos usuários (evita 1 consulta extra por linha).
+  async function exportarCSV() {
+    setExportando(true);
+    setErroExport('');
+    try {
+      const q = query(collection(db, 'usuarios'), orderBy('cadastro', 'desc'));
+      const snap = await getDocs(q);
+
+      const linhas = snap.docs.map(d => {
+        const data = d.data();
+        return {
+          nome: data.nome || data.email || 'Sem nome',
+          email: data.email || '',
+          status: data.status || 'ativo',
+          cadastro: formatarData(data.cadastro),
+        };
+      });
+
+      baixarComoCSV(linhas);
+    } catch (e) {
+      console.warn('Erro ao exportar CSV:', e);
+      setErroExport('Não foi possível exportar os usuários agora.');
+    } finally {
+      setExportando(false);
+    }
+  }
+
   return {
     usuarios,
     totalUsuarios,
     totalLivros,
     totalEstantesSecretas,
-    totalRegistrosTabela,
+    totalRegistros,
     currentPage,
     totalPages,
     loading,
     erro,
     proximaPagina,
     paginaAnterior,
-    desativarUsuario,
-    reativarUsuario,
     termoBusca,
     setTermoBusca,
-    statusFiltro,
-    setStatusFiltro,
     ordenacao,
     alternarOrdenacao,
     buscando,
+    exportarCSV,
+    exportando,
+    erroExport,
   };
 }
 
@@ -234,4 +225,33 @@ function formatarData(timestamp) {
   } catch {
     return '—';
   }
+}
+
+function escaparCampoCSV(valor) {
+  const texto = String(valor ?? '');
+  // Se tiver vírgula, aspas ou quebra de linha, precisa envolver em aspas
+  if (texto.includes(',') || texto.includes('"') || texto.includes('\n')) {
+    return '"' + texto.replace(/"/g, '""') + '"';
+  }
+  return texto;
+}
+
+function baixarComoCSV(linhas) {
+  if (typeof document === 'undefined') return; // segurança, caso rode fora do navegador
+
+  const cabecalho = ['Nome', 'E-mail', 'Status', 'Cadastro'];
+  const corpo = linhas.map(l => [l.nome, l.email, l.status, l.cadastro].map(escaparCampoCSV).join(','));
+  const csv = [cabecalho.join(','), ...corpo].join('\n');
+
+  // \uFEFF (BOM) garante que o Excel reconheça acentuação corretamente
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'usuarios_minha_estante.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
