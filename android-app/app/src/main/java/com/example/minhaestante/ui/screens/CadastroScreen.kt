@@ -8,6 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -30,7 +32,8 @@ import com.example.minhaestante.ui.theme.Baskervville
 
 @Composable
 fun CadastroScreen(
-    onCadastroSuccess: () -> Unit
+    onCadastroSuccess: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
     val firebaseRepo = remember { FirebaseRepo() } // Instanciando o repositório
@@ -54,11 +57,22 @@ fun CadastroScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Spacer(modifier = Modifier.height(38.dp))
+        // BOTÃO VOLTAR
+        Row(modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(id = R.string.desc_botao_voltar),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Image(
             painter = painterResource(id = if (darkTheme) R.drawable.logindark else R.drawable.logo),
-            contentDescription = "Logo do Aplicativo",
+            contentDescription = stringResource(id = R.string.desc_logo_app),
             modifier = Modifier.size(165.dp)
         )
 
@@ -68,7 +82,7 @@ fun CadastroScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (darkTheme) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.background
+                containerColor = MaterialTheme.colorScheme.background
             ),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface)
         ) {
@@ -76,7 +90,7 @@ fun CadastroScreen(
 
                 // USUÁRIO
                 Text(
-                    text = "Usuário",
+                    text = stringResource(id = R.string.label_usuario),
                     fontFamily = Baskervville,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -92,16 +106,21 @@ fun CadastroScreen(
                         .testTag("campoUsuario"),
                     shape = RoundedCornerShape(16.dp),
                     trailingIcon = { Icon(Icons.Default.Person, null, modifier = Modifier.size(16.dp)) },
-                    label = { Text("Digite seu nome de usuário") },
-                    supportingText = { if (vazioUsuario) Text("Campo obrigatório") },
-                    isError = vazioUsuario
+                    label = { Text(stringResource(id = R.string.hint_usuario)) },
+                    supportingText = { if (vazioUsuario) Text(stringResource(id = R.string.erro_obrigatorio)) },
+                    isError = vazioUsuario,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        cursorColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // EMAIL
                 Text(
-                    text = "E-mail",
+                    text = stringResource(id = R.string.label_email),
                     fontFamily = Baskervville,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -117,16 +136,21 @@ fun CadastroScreen(
                         .testTag("campoEmail"),
                     shape = RoundedCornerShape(16.dp),
                     trailingIcon = { Icon(Icons.Default.Email, null, modifier = Modifier.size(16.dp)) },
-                    label = { Text("Digite seu e-mail") },
-                    supportingText = { if (vazioEmail) Text("Campo obrigatório") },
-                    isError = vazioEmail
+                    label = { Text(stringResource(id = R.string.hint_email_cadastro)) },
+                    supportingText = { if (vazioEmail) Text(stringResource(id = R.string.erro_obrigatorio)) },
+                    isError = vazioEmail,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        cursorColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // SENHA
                 Text(
-                    text = "Senha",
+                    text = stringResource(id = R.string.label_senha),
                     fontFamily = Baskervville,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -141,18 +165,25 @@ fun CadastroScreen(
                         .testTag("campoSenha"),
                     visualTransformation = if (vizivelSenha) VisualTransformation.None else PasswordVisualTransformation(),
                     shape = RoundedCornerShape(16.dp),
-                    label = { Text("Escolha uma senha") },
+                    label = { Text(stringResource(id = R.string.hint_escolha_senha)) },
                     supportingText = { erroSenha?.let { Text(it) } },
                     isError = erroSenha != null,
                     trailingIcon = {
                         IconButton(onClick = { vizivelSenha = !vizivelSenha }) {
                             Icon(
                                 imageVector = if (vizivelSenha) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = "Mostrar ou ocultar senha",
+                                contentDescription = stringResource(
+                                    id = if (vizivelSenha) R.string.desc_ocultar_senha else R.string.desc_mostrar_senha
+                                ),
                                 modifier = Modifier.size(16.dp)
                             )
                         }
-                    }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        cursorColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

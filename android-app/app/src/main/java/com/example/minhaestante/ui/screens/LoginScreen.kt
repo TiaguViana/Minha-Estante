@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -69,6 +71,10 @@ fun LoginScreen(
     var senha by remember { mutableStateOf("") }
     var senhaVizivel by remember { mutableStateOf(false) }
 
+    val textoErroObrigatorio = stringResource(id = R.string.erro_obrigatorio)
+    val textoErroSenhaCurta = stringResource(id = R.string.erro_senha_curta)
+    val textoSucessoLogin = stringResource(id = R.string.sucesso_login)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -81,7 +87,7 @@ fun LoginScreen(
 
         Image(
             painter = painterResource(id = if (darkTheme) R.drawable.logindark else R.drawable.logo),
-            contentDescription = "Logo",
+            contentDescription = stringResource(id = R.string.desc_logo_app),
             modifier = Modifier.size(165.dp)
         )
 
@@ -91,7 +97,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (darkTheme) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.background
+                containerColor = MaterialTheme.colorScheme.background
             ),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface)
         ) {
@@ -99,7 +105,7 @@ fun LoginScreen(
 
                 // EMAIL
                 Text(
-                    text = "E-mail",
+                    text = stringResource(id = R.string.label_email),
                     color = MaterialTheme.colorScheme.primary,
                     fontFamily = Baskervville,
                     fontWeight = FontWeight.Bold,
@@ -114,18 +120,27 @@ fun LoginScreen(
                     onValueChange = { email = it; vazioEmail = false },
                     shape = RoundedCornerShape(16.dp),
                     trailingIcon = {
-                        Icon(Icons.Default.Email, "Email", modifier = Modifier.size(16.dp))
+                        Icon(
+                            Icons.Default.Email,
+                            contentDescription = stringResource(id = R.string.desc_icone_email),
+                            modifier = Modifier.size(16.dp)
+                        )
                     },
-                    label = { Text("Digite seu e-mail") },
-                    supportingText = { if (vazioEmail) Text("Campo obrigatório") },
-                    isError = vazioEmail
+                    label = { Text(stringResource(id = R.string.hint_email)) },
+                    supportingText = { if (vazioEmail) Text(stringResource(id = R.string.erro_obrigatorio)) },
+                    isError = vazioEmail,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        cursorColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // SENHA
                 Text(
-                    text = "Senha",
+                    text = stringResource(id = R.string.label_senha),
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 16.sp,
                     fontFamily = Baskervville,
@@ -140,27 +155,36 @@ fun LoginScreen(
                     onValueChange = { senha = it; erroSenha = null },
                     visualTransformation = if (senhaVizivel) VisualTransformation.None else PasswordVisualTransformation(),
                     shape = RoundedCornerShape(16.dp),
-                    label = { Text("Digite sua senha") },
+                    label = { Text(stringResource(id = R.string.hint_senha)) },
                     supportingText = { erroSenha?.let { Text(it) } },
                     isError = erroSenha != null,
                     trailingIcon = {
                         IconButton(onClick = { senhaVizivel = !senhaVizivel }) {
                             Icon(
                                 imageVector = if (senhaVizivel) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = "Mostrar/Ocultar",
+                                contentDescription = stringResource(
+                                    id = if (senhaVizivel) R.string.desc_ocultar_senha else R.string.desc_mostrar_senha
+                                ),
                                 modifier = Modifier.size(16.dp)
                             )
                         }
-                    }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        cursorColor = MaterialTheme.colorScheme.onBackground
+                    )
                 )
 
                 // Redefinir senha
                 Text(
-                    text = "Esqueceu sua senha?",
+                    text = stringResource(id = R.string.link_esqueceu_senha),
                     fontFamily = AtkinsonHyperlegible,
                     color = MaterialTheme.colorScheme.secondary,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 8.dp).clickable { /* Esqueci senha */ }
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .clickable(onClickLabel = stringResource(id = R.string.desc_link_esqueceu_senha)) { /* Esqueci senha */ }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -171,8 +195,8 @@ fun LoginScreen(
                         vazioEmail = email.isEmpty()
 
                         erroSenha = when {
-                            senha.isEmpty() -> "Campo obrigatório"
-                            senha.length < 6 -> "A senha deve ter pelo menos 6 caracteres"
+                            senha.isEmpty() -> textoErroObrigatorio
+                            senha.length < 6 -> textoErroSenhaCurta
                             else -> null
                         }
 
@@ -185,7 +209,7 @@ fun LoginScreen(
                                 senha = senha,
                                 onSuccess = {
                                     isLoading = false
-                                    Toast.makeText(context, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, textoSucessoLogin, Toast.LENGTH_SHORT).show()
                                     onLoginSuccess() // Vai para a MainScreen
                                 },
                                 onFailure = { erro ->
@@ -204,7 +228,7 @@ fun LoginScreen(
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.primary)
                     } else {
                         Text(
-                            text = "Entrar",
+                            text = stringResource(id = R.string.btn_entrar),
                             color = if (darkTheme) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary,
                             fontSize = 18.sp,
                             fontFamily = Baskervville,
@@ -217,11 +241,13 @@ fun LoginScreen(
 
         // CADASTRO
         Text(
-            text = "Não tem uma conta? Cadastre-se",
+            text = stringResource(id = R.string.link_criar_conta),
             fontFamily = AtkinsonHyperlegible,
             color = MaterialTheme.colorScheme.secondary,
             fontSize = 14.sp,
-            modifier = Modifier.padding(top = 24.dp).clickable { onNavigateToCadastro() }
+            modifier = Modifier
+                .padding(top = 24.dp)
+                .clickable(onClickLabel = stringResource(id = R.string.desc_link_criar_conta)) { onNavigateToCadastro() }
         )
     }
 }

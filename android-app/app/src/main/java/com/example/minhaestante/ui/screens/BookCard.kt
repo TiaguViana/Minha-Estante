@@ -76,6 +76,9 @@ fun BookCard(
 
     val dateFormat = remember { SimpleDateFormat("dd/MM", Locale.getDefault()) }
 
+    // Isolamento do estado do favorito para forçar a re-recomposição imediata do ícone
+    val isFavoriteState = remember(book.isFavorite) { book.isFavorite }
+
     // Tratamento de strings fallback para evitar quebras visuais e falhas de tradução
     val tituloTratado = book.title.ifEmpty { stringResource(id = R.string.label_sem_titulo) }
     val autorTratado = book.author.ifEmpty { stringResource(id = R.string.label_autor_desconhecido) }
@@ -166,13 +169,13 @@ fun BookCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val descFavorito = stringResource(
-                        id = if (book.isFavorite) R.string.desc_desfavoritar_livro else R.string.desc_favoritar_livro,
+                        id = if (isFavoriteState) R.string.desc_desfavoritar_livro else R.string.desc_favoritar_livro,
                         tituloTratado
                     )
                     Icon(
-                        imageVector = if (book.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        imageVector = if (isFavoriteState) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                         contentDescription = descFavorito,
-                        tint = StatusConcluidoLight,
+                        tint = if (isFavoriteState) StatusConcluidoLight else textSecondaryColor.copy(alpha = 0.6f),
                         modifier = Modifier
                             .size(20.dp)
                             .clickable(

@@ -72,4 +72,9 @@
     <string name="desc_livro_status_andamento">Reading status in progress</string>
     <string name="desc_avaliacao_livro">Rating: %1$d out of 5 stars</string>
     <string name="desc_editar_livro">Edit details for the book %1$s</string>
+    <string name="status_concluido">Completed</string>
+    <string name="status_andamento">In Progress</string>
+    <string name="desc_botao_voltar">Back to the login screen</string>
+    <string name="btn_sair">Log out</string>
+    <string name="desc_botao_sair">Button to sign out and return to the login screen</string>
 </resources>

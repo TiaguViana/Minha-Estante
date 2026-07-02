@@ -1,5 +1,7 @@
 package com.example.minhaestante.ui.screens
 
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,30 +27,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import com.example.minhaestante.R
 import com.example.minhaestante.data.repository.FirebaseRepo
-import com.example.minhaestante.ui.theme.AtkinsonHyperlegible
-import com.example.minhaestante.ui.theme.Baskervville
-import com.example.minhaestante.ui.theme.BuscaBordaDark
-import com.example.minhaestante.ui.theme.BuscaBordaLight
-import com.example.minhaestante.ui.theme.BuscaPreenchimentoDark
-import com.example.minhaestante.ui.theme.BuscaPreenchimentoLight
-import com.example.minhaestante.ui.theme.CorDestaque
-import com.example.minhaestante.ui.theme.DarkBackground
-import com.example.minhaestante.ui.theme.DarkTextPrimary
-import com.example.minhaestante.ui.theme.DarkTextSecondary
-import com.example.minhaestante.ui.theme.EstanteSecretaPrimaryLight
-import com.example.minhaestante.ui.theme.EstanteSecretaSecondaryLight
-import com.example.minhaestante.ui.theme.LightBackground
-import com.example.minhaestante.ui.theme.LightTextPrimary
-import com.example.minhaestante.ui.theme.LightTextSecondary
-import com.example.minhaestante.ui.theme.MeusLivrosPrimaryLight
-import com.example.minhaestante.ui.theme.MeusLivrosSecondaryLight
+import com.example.minhaestante.ui.theme.*
 import com.example.minhaestante.utils.BiometricHelper.autenticar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+
+// FUNÇÃO CRUCIAL: Extrai com segurança a FragmentActivity real do topo da pilha de Contextos
+private fun Context.findFragmentActivity(): FragmentActivity? {
+    var currentContext = this
+    while (currentContext is ContextWrapper) {
+        if (currentContext is FragmentActivity) {
+            return currentContext
+        }
+        currentContext = currentContext.baseContext
+    }
+    return null
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,17 +55,15 @@ fun MainScreen() {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
 
-    // Injeção do nosso Repositório
     val repository = remember { FirebaseRepo() }
-
     val auth = remember { FirebaseAuth.getInstance() }
     val firestore = remember { FirebaseFirestore.getInstance() }
 
     val stringCarregando = stringResource(id = R.string.usuario_carregando)
     var nomeUsuario by remember { mutableStateOf(stringCarregando) }
 
-    // Carrega o nome do usuário ativo
-    LaunchedEffect(Unit) {
+    // Sincroniza o usuário atual de forma reativa ao ciclo de vida da tela
+    LaunchedEffect(auth.currentUser?.uid) {
         val uid = auth.currentUser?.uid
         if (uid != null) {
             firestore.collection("usuarios").document(uid)
@@ -86,40 +83,81 @@ fun MainScreen() {
     val textSecondaryColor = if (isDark) DarkTextSecondary else LightTextSecondary
     val goldAccent = if (isDark) BuscaBordaDark else BuscaBordaLight
 
-    // Conexão em tempo real com o Firestore para buscar a lista
-    val booksList by repository.getBooks().collectAsState(initial = emptyList())
+    // Coleta a lista do Firebase de forma reativa a mudanças de autenticação
+    // IMPORTANTE: getBooks() precisa ser lembrado (remember). Sem isso, toda
+    // recomposição (ex: clicar no coração) cria um Flow/listener novo do Firestore,
+    // cancelando o anterior e gerando uma corrida entre o snapshot antigo e o novo —
+    // é isso que fazia o coração às vezes não refletir/persistir a mudança.
+    val booksFlow = remember(auth.currentUser?.uid) { repository.getBooks() }
+    val booksList by booksFlow.collectAsState(initial = emptyList())
 
     var selectedTab by remember { mutableStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
     var isDescendingOrder by remember { mutableStateOf(true) }
     var filterOnlyFavorites by remember { mutableStateOf(false) }
 
-    val currentSection = if (selectedTab == 0) BookSection.MEUS_LIVROS else BookSection.ESTANTE_SECRETA
+    var dispararBiometria by remember { mutableStateOf(false) }
 
-    // A sua lógica impecável de filtros
-    val filteredBooks = booksList.filter { book ->
-        val matchesTab = book.section == currentSection
-        val matchesSearch = book.title.contains(searchQuery, ignoreCase = true) ||
-                book.author.contains(searchQuery, ignoreCase = true)
-        val matchesFavorite = if (filterOnlyFavorites) book.isFavorite else true
-        matchesTab && matchesSearch && matchesFavorite
-    }
-
-    val sortedBooks = filteredBooks.sortedWith { b1, b2 ->
-        if (isDescendingOrder) {
-            b2.readingDate.compareTo(b1.readingDate)
-        } else {
-            b1.readingDate.compareTo(b2.readingDate)
+    // CORREÇÃO DA BIOMETRIA: Invoca o Helper usando a FragmentActivity extraída com precisão
+    LaunchedEffect(dispararBiometria) {
+        if (dispararBiometria) {
+            val activity = context.findFragmentActivity()
+            if (activity != null) {
+                autenticar(
+                    context = activity,
+                    onSucesso = {
+                        selectedTab = 1
+                        dispararBiometria = false
+                    },
+                    onErro = {
+                        selectedTab = 0
+                        dispararBiometria = false
+                    }
+                )
+            } else {
+                dispararBiometria = false
+            }
         }
     }
 
-    val groupFormatter = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-    val groupedBooks = sortedBooks.groupBy { book ->
-        groupFormatter.format(book.readingDate).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    val currentSection = if (selectedTab == 0) BookSection.MEUS_LIVROS else BookSection.ESTANTE_SECRETA
+
+    // CORREÇÃO DOS FAVORITOS: A filtragem escuta diretamente qualquer mutação na lista vinda do Firebase
+    val filteredBooks = remember(booksList, selectedTab, searchQuery, filterOnlyFavorites) {
+        booksList.filter { book ->
+            val matchesTab = book.section == currentSection
+            val matchesSearch = book.title.contains(searchQuery, ignoreCase = true) ||
+                    book.author.contains(searchQuery, ignoreCase = true)
+            val matchesFavorite = !filterOnlyFavorites || book.isFavorite
+            matchesTab && matchesSearch && matchesFavorite
+        }
+    }
+
+    val sortedBooks = remember(filteredBooks, isDescendingOrder) {
+        filteredBooks.sortedWith { b1, b2 ->
+            if (isDescendingOrder) {
+                b2.readingDate.compareTo(b1.readingDate)
+            } else {
+                b1.readingDate.compareTo(b2.readingDate)
+            }
+        }
+    }
+
+    val groupFormatter = remember { SimpleDateFormat("MMMM yyyy", Locale.getDefault()) }
+    val groupedBooks = remember(sortedBooks) {
+        sortedBooks.groupBy { book ->
+            groupFormatter.format(book.readingDate).replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+            }
+        }
     }
 
     var showModal by remember { mutableStateOf(false) }
     var bookToEdit by remember { mutableStateOf<Book?>(null) }
+    // Capturamos a seção no exato instante do clique em "+", em vez de deixar o onSave
+    // depender de "currentSection" recalculado numa recomposição futura. Isso elimina
+    // qualquer possibilidade de o livro ser salvo na seção errada por causa de timing.
+    var sectionParaNovoLivro by remember { mutableStateOf(currentSection) }
 
     Box(
         modifier = Modifier
@@ -194,13 +232,7 @@ fun MainScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .weight(1f)
-                        .clickable {
-                            autenticar(
-                                context = context,
-                                onSucesso = { selectedTab = 1 },
-                                onErro = { selectedTab = 0 }
-                            )
-                        }
+                        .clickable { dispararBiometria = true }
                 ) {
                     Text(
                         text = stringResource(id = R.string.aba_estante_secreta),
@@ -260,10 +292,9 @@ fun MainScreen() {
                     modifier = Modifier
                         .size(44.dp)
                         .border(1.5.dp, goldAccent, RoundedCornerShape(22.dp))
-                        .clickable(
-                            onClickLabel = stringResource(id = R.string.desc_botao_adicionar)
-                        ) {
+                        .clickable(onClickLabel = stringResource(id = R.string.desc_botao_adicionar)) {
                             bookToEdit = null
+                            sectionParaNovoLivro = currentSection
                             showModal = true
                         },
                     contentAlignment = Alignment.Center
@@ -300,7 +331,7 @@ fun MainScreen() {
                     Icon(
                         imageVector = if (filterOnlyFavorites) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = stringResource(id = R.string.desc_filtrar_favoritos),
-                        tint = if (filterOnlyFavorites) goldAccent else CorDestaque,
+                        tint = if (filterOnlyFavorites) CorDestaque else goldAccent,
                         modifier = Modifier
                             .size(22.dp)
                             .clickable { filterOnlyFavorites = !filterOnlyFavorites }
@@ -353,7 +384,7 @@ fun MainScreen() {
                         }
                     }
 
-                    items(booksInMonth) { book ->
+                    items(booksInMonth, key = { it.id }) { book ->
                         BookCard(
                             book = book,
                             section = currentSection,
@@ -365,6 +396,7 @@ fun MainScreen() {
                                 repository.deleteBook(book.id)
                             },
                             onFavoriteClick = {
+                                // Envia a alteração diretamente para o repositório Firebase
                                 repository.saveBook(book.copy(isFavorite = !book.isFavorite))
                             }
                         )
@@ -379,13 +411,12 @@ fun MainScreen() {
             bookToEdit = bookToEdit,
             section = currentSection,
             onDismiss = { showModal = false },
-            onSave = { title, author, desc, status, rating, date, imageUrl ->
+            onSave = { title, author, description, status, rating, date, imageUrl ->
                 if (bookToEdit == null) {
                     val newBook = Book(
-                        // O ID já é criado automaticamente pela sua classe Book!
                         title = title,
                         author = author,
-                        description = desc,
+                        description = description,
                         readingStatus = status,
                         rating = rating,
                         readingDate = date,
@@ -398,7 +429,7 @@ fun MainScreen() {
                     val updatedBook = bookToEdit!!.copy(
                         title = title,
                         author = author,
-                        description = desc,
+                        description = description,
                         readingStatus = status,
                         rating = rating,
                         readingDate = date,

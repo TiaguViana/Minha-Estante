@@ -2,6 +2,7 @@ package com.example.minhaestante.data.repository
 
 import com.example.minhaestante.data.User
 import com.example.minhaestante.ui.screens.Book
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -77,6 +78,12 @@ class FirebaseRepo {
         val userId = auth.currentUser?.uid ?: return
         firestore.collection("usuarios").document(userId)
             .collection("livros").document(book.id).set(book)
+            .addOnFailureListener { e ->
+                // Se a escrita for rejeitada (ex: regra de segurança do Firestore),
+                // o cache local reverte sozinho e a UI "volta atrás" sem aviso nenhum.
+                // Logamos aqui pra dar visibilidade em caso de falha.
+                Log.e("FirebaseRepo", "Falha ao salvar livro ${book.id}", e)
+            }
     }
 
     // Apaga um livro
@@ -84,5 +91,8 @@ class FirebaseRepo {
         val userId = auth.currentUser?.uid ?: return
         firestore.collection("usuarios").document(userId)
             .collection("livros").document(bookId).delete()
+            .addOnFailureListener { e ->
+                Log.e("FirebaseRepo", "Falha ao apagar livro $bookId", e)
+            }
     }
 }

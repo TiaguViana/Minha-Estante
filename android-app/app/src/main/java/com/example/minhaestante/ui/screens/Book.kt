@@ -1,5 +1,6 @@
 package com.example.minhaestante.ui.screens
 
+import com.google.firebase.firestore.PropertyName
 import java.util.Date
 import java.util.UUID
 
@@ -22,6 +23,8 @@ data class Book(
     val rating: Int = 3,
     val readingDate: Date = Date(),
     val imageUrl: String? = null,
-    val isFavorite: Boolean = false,
+    @get:PropertyName("isFavorite")
+    @set:PropertyName("isFavorite")
+    var isFavorite: Boolean = false,
     val section: BookSection = BookSection.MEUS_LIVROS
 )

@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.minhaestante.ui.screens.*
+import androidx.compose.runtime.key
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
@@ -46,7 +47,7 @@ fun AppNavigation() {
             )
         }
 
-        // 3. Tela de Cadastro
+        // 3. Tela de Cadastro (CORRIGIDO ADICIONANDO O RETORNO)
         composable(Screen.Cadastro.route) {
             CadastroScreen(
                 onCadastroSuccess = {
@@ -54,13 +55,22 @@ fun AppNavigation() {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Cadastro.route) { inclusive = true }
                     }
+                },
+                onNavigateBack = {
+                    // Executado quando clicar na seta de voltar da barra superior do Cadastro
+                    navController.popBackStack()
                 }
             )
         }
 
         // 4. Tela Principal (Dashboard Firebase CRUD)
         composable(Screen.Main.route) {
-            MainScreen()
+            val currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+            // O 'key' força a MainScreen a resetar o estado interno caso o UID mude (logout/login)
+            key(currentUid) {
+                MainScreen()
+            }
         }
     }
 }

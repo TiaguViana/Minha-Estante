@@ -72,4 +72,9 @@
     <string name="desc_livro_status_andamento">Status de leitura em andamento</string>
     <string name="desc_avaliacao_livro">Avaliação: %1$d de 5 estrelas</string>
     <string name="desc_editar_livro">Editar informações do livro %1$s</string>
+    <string name="status_concluido">Concluído</string>
+    <string name="status_andamento">Em Andamento</string>
+    <string name="desc_botao_voltar">Voltar para a tela de login</string>
+    <string name="btn_sair">Sair</string>
+    <string name="desc_botao_sair">Botão para encerrar a sessão e voltar para a tela de login</string>
 </resources>
